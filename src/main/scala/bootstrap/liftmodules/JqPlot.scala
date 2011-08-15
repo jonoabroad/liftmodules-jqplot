@@ -3,21 +3,23 @@ package net {
     package jqplot {
       
     import scala.collection.mutable.Map
-    
-    
     import net.liftweb.common.{ Box, Empty, Failure,Full }
     import net.liftweb.http.{ LiftRules, ResourceServer }
     import net.liftweb.http.js.JE.JsRaw
     import net.liftweb.http.js.JsCmds._
     import net.liftweb.http.rest.RestHelper
-    import net.liftweb.json.JsonAST.JValue
+    import net.liftweb.json.JsonAST.{JString,JValue}
     import net.liftweb.util.Helpers
+    import net.liftweb.http.S
+    import net.liftweb.common.Loggable
 
-      object JqPlot extends RestHelper {
+      object JqPlot extends RestHelper with Loggable {
 
         val m = Map[String,JqPlot]();
         
         def init: Unit = {
+          
+          logger.info("JqPlot.init")
 
           ResourceServer.allow({
             case "js" :: "jquery.js" :: Nil => true
@@ -47,14 +49,16 @@ package net {
             case "js" :: "plugins" :: "jqplot.ohlcRenderer.js" :: Nil => true
             case "js" :: "plugins" :: "jqplot.pieRenderer.js" :: Nil => true
             case "js" :: "plugins" :: "jqplot.pointLabel.js" :: Nil => true
-            case "js" :: "plugins" :: "jqplot.trenline.js" :: Nil => true
+            case "js" :: "plugins" :: "jqplot.trendline.js" :: Nil => true
             case "css" :: "jquery.jqplot.css" :: Nil => true
           })
 
           serve {
-            case JsonGet("jqplot" :: id :: Nil, _) => m.get(id) match {
-              case Some(plot) => JValue("yay")
-              case otherwise => Failure("Not yet implemented", Empty, Empty)
+            case JsonGet("jqplot" :: id :: Nil, _) => 
+             logger.info("JqPlot.serve.jqPlot %s".format(id)) 
+             m.get(id) match {
+              case Some(plot) => Full(JString("yay"))
+              case otherwise => Failure("Not yet implemented", Empty, Empty):Box[JValue]
              }
           }
           
@@ -68,12 +72,16 @@ package net {
       }
       
       
-      class JqPlot(data: () => Box[String] , options: () => Box[String]) {
+      class JqPlot(data: Box[() => String] , options: Box[() => String]) {
 
-        val id = Helpers.nextFuncName
+       val id = Helpers.nextFuncName
 
-        val onLoad = JsRaw(
-          """$(document).ready(function(){
+       JqPlot.data(id,this)
+        
+        
+        def toHtml = {
+	        val onLoad = JsRaw(
+"""$(document).ready(function(){
   var json_url = "/plot/%s"
   
   var payload = (function () {
@@ -85,20 +93,26 @@ package net {
   $.jqplot('%s', payload.data,payload.options);
   
 });""".format(id, id))
+	
 
+ 
         <span>
           <head>
             <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
-            <script type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
-            <script type="text/javascript" src="/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
-            <script type="text/javascript" src="/js/plugins/jqplot.canvasTextRenderer.min.js"></script>
-            <script type="text/javascript" src="/js/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
-            <script type="text/javascript" src="/js/plugins/jqplot.trendline.min.js"></script>
-            <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.min.css"/>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/jquery.jqplot.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.dateAxisRenderer.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.canvasTextRenderer.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.canvasAxisLabelRenderer.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.trendline.js"}></script>
+            <link rel="stylesheet" type="text/css" href={S.contextPath + "/" + LiftRules.resourceServerPath + "/css/jquery.jqplot.css"} />
             { Script(onLoad) }
           </head>
           <div id={ id } style="height:384px; width:512px;"></div>
         </span>
+          
+        }
+        
+
 
       }
 
