@@ -1,0 +1,15 @@
+/project/plugins/target/
+/project/plugins/src_managed/
+/project/plugins/project/
+/project/plugins/lib_managed/
+/project/boot/
+/target/
+/project/build/target/
+/lib_managed/
+/.scala_dependencies
+/.project
+/.classpath
+/lift_proto.db.h2.db
+/lift_proto.db.lock.db
+/project/target/
+/.target/
