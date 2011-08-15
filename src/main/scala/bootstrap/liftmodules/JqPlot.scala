@@ -82,11 +82,11 @@ package net {
         def toHtml = {
 	        val onLoad = JsRaw(
 """$(document).ready(function(){
-  var json_url = "/plot/%s"
+  var json_url = "/jqplot/%s";
   
   var payload = (function () {
         var ajaxResponse = '';
-        $.ajax({url:json_url, async:false, type:"post", success: function (data) {ajaxResponse = data;}, dataType:"json"}); 
+        $.ajax({url:json_url, async:false, type:"get", success: function (data) {ajaxResponse = data;}, dataType:"json"}); 
         return ajaxResponse;
   }());
 
