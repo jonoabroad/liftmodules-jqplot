@@ -15,7 +15,7 @@ package net {
 
       object JqPlot extends RestHelper with Loggable {
 
-        val m = Map[String,JqPlot]();
+        val m = Map[String,JqPlotAjax]();
         
         def init: Unit = {
           
@@ -68,13 +68,45 @@ package net {
 
         }
 
-        def data(id:String,plot:JqPlot) = {m.put(id,plot)}
+        def data(id:String,plot:JqPlotAjax) = {m.put(id,plot)}
           
         
       }
       
+      class JqPlot(series:String, options:String) {
+                
+        val id = Helpers.nextFuncName        
+        
+        def toHtml = {
+	        val onLoad = JsRaw(
+"""$(document).ready(function(){
+  var options = %s;
+  var series  = %s; 
+
+  $.jqplot('%s',series,options);
+  
+});""".format(options,series,id))
+ 
+        <span>
+          <head>
+            <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/jquery.jqplot.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.dateAxisRenderer.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.canvasTextRenderer.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.canvasAxisLabelRenderer.js"}></script>
+            <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/plugins/jqplot.trendline.js"}></script>
+            <link rel="stylesheet" type="text/css" href={S.contextPath + "/" + LiftRules.resourceServerPath + "/css/jquery.jqplot.css"} />
+            { Script(onLoad) }
+          </head>
+          <div id={ id } style="height:384px; width:512px;"></div>
+        </span>
+          
+        }
+       
+      } 
+    
       
-      class JqPlot(d: Box[() => String] , o: Box[() => String]) {
+      class JqPlotAjax(d: Box[() => String] , o: Box[() => String]) {
 
         val data = d 
         
