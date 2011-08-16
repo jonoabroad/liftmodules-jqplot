@@ -8,7 +8,7 @@ package net {
     import net.liftweb.http.js.JE.JsRaw
     import net.liftweb.http.js.JsCmds._
     import net.liftweb.http.rest.RestHelper
-    import net.liftweb.json.JsonAST.{JString,JValue}
+    import net.liftweb.json.JsonAST.{JField,JObject,JString,JValue}
     import net.liftweb.util.Helpers
     import net.liftweb.http.S
     import net.liftweb.common.Loggable
@@ -57,7 +57,9 @@ package net {
             case JsonGet("jqplot" :: id :: Nil, _) => 
              logger.info("JqPlot.serve.jqPlot %s".format(id)) 
              m.get(id) match {
-              case Some(plot) => Full(JString("yay"))
+              case Some(plot) => 
+                
+                Full(JObject(List(JField("data",JString(plot.data.get.apply)),JField("options",JString(plot.options.get.apply)))))
               case otherwise => Failure("Not yet implemented", Empty, Empty):Box[JValue]
              }
           }
@@ -72,11 +74,15 @@ package net {
       }
       
       
-      class JqPlot(data: Box[() => String] , options: Box[() => String]) {
+      class JqPlot(d: Box[() => String] , o: Box[() => String]) {
 
-       val id = Helpers.nextFuncName
+        val data = d 
+        
+        val options = o 
+        
+        val id = Helpers.nextFuncName
 
-       JqPlot.data(id,this)
+        JqPlot.data(id,this)
         
         
         def toHtml = {
@@ -111,9 +117,7 @@ package net {
         </span>
           
         }
-        
-
-
+       
       }
 
     }
