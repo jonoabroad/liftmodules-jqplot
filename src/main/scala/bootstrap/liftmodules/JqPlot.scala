@@ -30,9 +30,11 @@ package net {
         
       }
       
-      class JqPlot(series:String, options:String) {
+      class JqPlot(x:Int,y:Int,series:String, options:String) {
                 
         val id = Helpers.nextFuncName   
+        
+        val style = "height:%spx; width:%spx;".format(x,y)
         
         val version = Props.mode match {
             case Production => ".js" 
@@ -57,7 +59,7 @@ package net {
             <link rel="stylesheet" type="text/css" href={S.contextPath + "/" + LiftRules.resourceServerPath + "/css/jquery.jqplot.css"} />
             { Script(onLoad) }
           </head>
-          <div id={ id } style="height:384px; width:512px;"></div>
+          <div id={ id } style={ style }></div>
         </span>
           
         }
