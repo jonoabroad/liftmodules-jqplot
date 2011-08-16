@@ -1,66 +1,13 @@
-Lift on CloudBees Template
-
-LoCB is based on the Lift 2.3 archive from http://liftweb.net/download. 
-This build is for ::
-
-    Scala 2.9
-    Lift 2.4-M3
-    SBT 0.10.1
-
-It has several SBT plugins added for convenience.
-
-     sbt-eclipsify 
-     sbt-cloudbees-plugin
-
-Getting started:
-
-Before firing up SBT update the project name in build.sbt
-
-If you are going to use Run@CloudBees you'll want to update the following: 
-
-         ~/.bees/bees.config is populated with your key & secret. 
-            bees.api.key=API_KEY
-            bees.api.secret=SECRET  
-
-        ./src/main/resources/props/production.default.props
-          //Sendgrid conf
-          email.sender=youd@example.com
-
-          # Sendgrid.com configuration:
-          mail.user=you@example.com
-          mail.password=password
-
-Sendgrid (or similar) must be used if deploying to cloudbees as the bees don't allow sending mail from localhost.
-
-If you don't want to use the cloudbees plugin at the very least update the web.xml
-to use the Lift filter rather than the CloudBees filter.  If you want to remove the 
-Cloud bees plugin entirely see below.  
-
-JNDI Conf
-
-        ./src/main/scala/bootstrap/liftweb/Boot.scala
-
-              DefaultConnectionIdentifier.jndiName = "jdbc/JNDI_NAME"
-
-        ./src/main/webapp/WEB-INF/cloudbees-web.xml
-
-              <resource name="jdbc/JNDI_NAME" auth="Container" type="javax.sql.DataSource">
-
-        ./src/main/webapp/WEB-INF/cloudbees-web.xml
-              
-              <param name="url" value="jdbc:cloudbees://JNDI_NAME" />
-
-        ./src/main/webapp/WEB-INF/web.xml
-            
-              <res-ref-name>jdbc/JNDI_NAME</res-ref-name>
-         
-Running & deploying 
- 
-1. sbt 
-2. > reload
-3. > update
-4. > eclipse 
-5. > jetty
-6. > bees-deploy
+JqPlot Module 
 
 
+TODO : 
+
+ * replace x & y width w & h 
+ * get pie chart working correctly
+ * use Json or scala datatypes rather than String for series & option - possibly have string as a easy way to hack. But beware of implicit conversion.
+ * Only put sutff in head once, use a RequestVar to say if something has been included,
+   if it has don't include again. Then look at something clever that does it at the end of the request life cycle.
+   
+   
+   

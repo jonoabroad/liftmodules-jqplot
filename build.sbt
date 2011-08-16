@@ -18,10 +18,8 @@ libraryDependencies ++= {
 
 // Customize any further dependencies as desired
 libraryDependencies ++= Seq(
-  "org.scala-tools.testing" % "specs_2.9.0" % "1.6.8" % "test", // For specs.org tests
-  "junit" % "junit" % "4.8" % "test->default", // For JUnit 4 testing
-  "javax.servlet" % "servlet-api" % "2.5" % "provided->default",
-  "ch.qos.logback" % "logback-classic" % "0.9.26" % "compile->default" // Logging
-)
-
-
+    "org.specs2" %% "specs2" % "1.5"  % "test",
+    "org.specs2" %% "specs2-scalaz-core" % "6.0.RC2" % "test",
+    "javax.servlet" % "servlet-api" % "2.5" % "provided->default",
+    "ch.qos.logback" % "logback-classic" % "0.9.26" % "compile->default" // Logging
+  )
