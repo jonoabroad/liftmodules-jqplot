@@ -32,7 +32,7 @@ package net {
         
       }
       
-      class JqPlot(x:Int,y:Int,series:String,options:String) extends Loggable {
+      class JqPlot(w:Int,h:Int,series:String,options:String) extends Loggable {
         
         
 //        def this(series:JValue,options:Value) = {
@@ -44,7 +44,7 @@ package net {
 //                
         val id = Helpers.nextFuncName   
         
-        val style = "height:%spx; width:%spx;".format(x,y)
+        val style = "height:%spx; width:%spx;".format(h,w)
         
         val version = Props.mode match {
             case Production => ".min.js" 
