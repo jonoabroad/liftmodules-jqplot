@@ -6,42 +6,18 @@ TODO :
  * use Json or scala datatypes rather than String for series & option - possibly have string as a easy way to hack. But beware of implicit conversion.
  * Only put sutff in head once, use a RequestVar to say if something has been included,
    if it has don't include again. Then look at something clever that does it at the end of the request life cycle.
+ * consider http://www.chuusai.com/2011/06/09/scala-union-types-curry-howard/ for the series objects.  
    
    
-   
-   
-   
-   
-           
-        /**
-         * Notes 
-         * 
-         *    _ ,Int 
+  Data types of series 
+  _ ,Int 
   Int,Int
   Double,Double
   String,Int
   String,Double
   Date,Double
 
- 
+ X  _ | Int | Double | String | Date
 
-
- _ | Int | Double | String | Date
-
- Int | Double
-         */
-//        import java.util.Date
-//         type listInt          = List[(Int,Int)]
-//         type listDouble       = List[(Double,Double)]
-//         type listStringInt    = List[(String,Int)]
-//         type listStringDouble = List[(String,Double)]
-//         type listDateInt      = List[(Date,Int)]
-//         type listDateDouble   = List[(Date,Double)]
-//        
-//         type all extends listInt
-//         
-//        def apply(w:Int,h:Int,options:String,series:List[List[Int]]*) = {
-//          
-          
-          
-//        }
+ Y  Int | Double
+    
