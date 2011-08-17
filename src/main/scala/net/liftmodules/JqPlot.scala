@@ -12,6 +12,7 @@ package net {
   import scala.xml.NodeSeq
   import net.liftweb.json.JsonAST._
   import net.liftweb.http.js.JE.JsVar
+  import java.text.SimpleDateFormat
 
 
       object JqPlot extends Loggable {
@@ -36,6 +37,8 @@ package net {
       
   
       class JqPlot(w:Int,h:Int,options:String,series:List[List[Any]]*) extends Loggable {
+        
+       val sdf =  new SimpleDateFormat("yyyy MM dd HH:mm")
         
         val id = Helpers.nextFuncName   
         
@@ -73,7 +76,7 @@ package net {
               	case x:Int    => JInt(x)
               	case x:Double  => JDouble(x)
               	case x:String  => JString(x)              
-              	case x:java.util.Date  => JString(x.toString())              
+              	case x:java.util.Date  => JString(sdf.format(x))             
               }
               )
               })}.toList
