@@ -32,39 +32,6 @@ package net {
 
         }
         
-        /**
-         * Notes 
-         * 
-         *    _ ,Int 
-  Int,Int
-  Double,Double
-  String,Int
-  String,Double
-  Date,Double
-
- 
-
-
- _ | Int | Double | String | Date
-
- Int | Double
-         */
-//        import java.util.Date
-//         type listInt          = List[(Int,Int)]
-//         type listDouble       = List[(Double,Double)]
-//         type listStringInt    = List[(String,Int)]
-//         type listStringDouble = List[(String,Double)]
-//         type listDateInt      = List[(Date,Int)]
-//         type listDateDouble   = List[(Date,Double)]
-//        
-//         type all extends listInt
-//         
-//        def apply(w:Int,h:Int,options:String,series:List[List[Int]]*) = {
-//          
-          
-          
-//        }
-        
       }
       
   
@@ -101,15 +68,15 @@ package net {
         def toCssTransformer:NodeSeq => NodeSeq = { _ => toHtml}
         
         def toHtml = {
-            val s = series.map { s => JArray(s.map {
-              case (x:Int) :: (y:Int) :: Nil  => JArray(List(JInt(x),JInt(y)))
-              case (x:Double) :: (y:Double) :: Nil  => JArray(List(JDouble(x),JDouble(y)))
-              case (x:String) :: (y:Double) :: Nil  => JArray(List(JString(x),JDouble(y)))              
-              case (x:String) :: (y:Int) :: Nil  => JArray(List(JString(x),JInt(y)))              
-            
-            })
-              
-            }.toList
+            val s = series.map { s => JArray( s.map { v => JArray( 
+              v.map { 
+              	case x:Int    => JInt(x)
+              	case x:Double  => JDouble(x)
+              	case x:String  => JString(x)              
+              	case x:java.util.Date  => JString(x.toString())              
+              }
+              )
+              })}.toList
             val onLoadJs = OnLoad(JsRaw("var options = %s;".format(options)) & new JsCrVar("series",JArray(s)) & Run("$.jqplot('%s',series,options);".format(id)))
         <span>
           <head_merge>
