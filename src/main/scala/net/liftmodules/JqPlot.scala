@@ -10,6 +10,8 @@ package net {
   import liftweb.util.Props.RunModes._
   import liftweb.common.Loggable
   import scala.xml.NodeSeq
+  import net.liftweb.json.JsonAST._
+  import net.liftweb.http.js.JE.JsVar
 
 
       object JqPlot extends Loggable {
@@ -30,18 +32,44 @@ package net {
 
         }
         
+        /**
+         * Notes 
+         * 
+         *    _ ,Int 
+  Int,Int
+  Double,Double
+  String,Int
+  String,Double
+  Date,Double
+
+ 
+
+
+ _ | Int | Double | String | Date
+
+ Int | Double
+         */
+//        import java.util.Date
+//         type listInt          = List[(Int,Int)]
+//         type listDouble       = List[(Double,Double)]
+//         type listStringInt    = List[(String,Int)]
+//         type listStringDouble = List[(String,Double)]
+//         type listDateInt      = List[(Date,Int)]
+//         type listDateDouble   = List[(Date,Double)]
+//        
+//         type all extends listInt
+//         
+//        def apply(w:Int,h:Int,options:String,series:List[List[Int]]*) = {
+//          
+          
+          
+//        }
+        
       }
       
-      class JqPlot(w:Int,h:Int,series:String,options:String) extends Loggable {
+  
+      class JqPlot(w:Int,h:Int,options:String,series:List[List[Any]]*) extends Loggable {
         
-        
-//        def this(series:JValue,options:Value) = {
-//          
-//          
-//        }
-//        
-//        def this(series:String)
-//                
         val id = Helpers.nextFuncName   
         
         val style = "height:%spx; width:%spx;".format(h,w)
@@ -73,29 +101,28 @@ package net {
         def toCssTransformer:NodeSeq => NodeSeq = { _ => toHtml}
         
         def toHtml = {
-	        val onLoad = JsRaw(
-"""$(document).ready(function(){
-  var options = %s;
-  var series  = %s; 
-
-  $.jqplot('%s',series,options);
-  
-});""".format(options,series,id))
- 
+            val s = series.map { s => JArray(s.map {
+              case (x:Int) :: (y:Int) :: Nil  => JArray(List(JInt(x),JInt(y)))
+              case (x:Double) :: (y:Double) :: Nil  => JArray(List(JDouble(x),JDouble(y)))
+              case (x:String) :: (y:Double) :: Nil  => JArray(List(JString(x),JDouble(y)))              
+              case (x:String) :: (y:Int) :: Nil  => JArray(List(JString(x),JInt(y)))              
+            
+            })
+              
+            }.toList
+            val onLoadJs = OnLoad(JsRaw("var options = %s;".format(options)) & new JsCrVar("series",JArray(s)) & Run("$.jqplot('%s',series,options);".format(id)))
         <span>
           <head_merge>
             <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
             <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/jquery.jqplot" + version}></script>
 	       { plugins } 	
             <link rel="stylesheet" type="text/css" href={S.contextPath + "/" + LiftRules.resourceServerPath + "/css/jquery.jqplot.css"} />
-            { Script(onLoad) }
+            { Script(onLoadJs) }
           </head_merge>
           <div id={ id } style={ style }></div>
         </span>
-          
         }
-       
-      } 
-
+      }   
+ 
   }
 }
