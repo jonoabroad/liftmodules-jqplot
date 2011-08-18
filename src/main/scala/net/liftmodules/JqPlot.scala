@@ -120,11 +120,22 @@ package net {
         
       }
 
-      trait JSONable { 
+      trait JSONable extends Loggable { 
       
         def fields:List[Box[JSONable]] = Nil
         
         def toJson:JField  
+        
+        protected def toJValue(x:Any) = x match {
+          case s:String => JString(s)
+          case i:Int => JInt(i)
+          case d:Double => JDouble(d)
+          case l:Location => JString(l.toString())
+          case otherwise => 
+            logger.error("We didn't cater for %s, sorry.".format(otherwise))
+            JNull
+          
+        } 
         
       }
       
@@ -188,27 +199,25 @@ package net {
       }  
       
       sealed trait Location
-      case class NW() extends Location { override def toString = "NW" }
-      case class NO() extends Location  { override def toString = "N" }
-      case class NE() extends Location { override def toString = "NE" }
-      case class EA() extends Location  { override def toString = "E" }
-      case class SE() extends Location { override def toString = "SE" }
-      case class SO() extends Location  { override def toString = "S" }
-      case class SW() extends Location { override def toString = "SW" }
-      case class WE() extends Location  { override def toString = "W" }
+      case class NW() extends Location { override def toString = "nw" }
+      case class NO() extends Location  { override def toString = "n" }
+      case class NE() extends Location { override def toString = "ne" }
+      case class EA() extends Location  { override def toString = "e" }
+      case class SE() extends Location { override def toString = "se" }
+      case class SO() extends Location  { override def toString = "s" }
+      case class SW() extends Location { override def toString = "sw" }
+      case class WE() extends Location  { override def toString = "w" }
 
-      
+      //Missing show. Assumption, if you don't want to show the legend, don't include it. 
       case class Legend(location:Box[Location] = Empty,xoffset:Box[Int] = Empty,yoffset:Box[Int] = Empty)  extends JSONable{
 
         def location(l:Location):Legend = this.copy(location = Full(l))
         def xoffset(x:Int):Legend = this.copy(xoffset = Full(x))
         def yoffset(y:Int):Legend = this.copy(yoffset = Full(y))
         
-        
-        
-        override def fields:List[Box[JSONable]] = Nil
-        
-        override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) }        
+        private def fieldz:List[(String,Box[Any])] = List(("location",location),("xoffset",xoffset),("yoffset",yoffset))
+       
+        override def toJson = { JField("legend",JObject(for { b <- fieldz; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
         
       }
       case class Grid(drawGridLines:Box[Boolean] = Empty,gridLineColor:Box[String] = Empty,background:Box[String] = Empty,
