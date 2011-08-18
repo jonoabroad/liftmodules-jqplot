@@ -16,7 +16,7 @@ package net {
         " correctly adds known plugins " in {
           val jqp = new JqPlot(0, 0, Empty,List())
           //"""{seriesDefaults: {renderer: jQuery.jqplot.PieRenderer,rendererOptions: {showDataLabels: true}},legend: { show:true, location: 'e' }}"""
-          jqp.plugins  must_== List(<script type="text/javascript" src="/classpath/js/jqplot.pieRenderer.js"></script>)
+          jqp.plugins  must_== List() //List(<script type="text/javascript" src="/classpath/js/jqplot.pieRenderer.js"></script>)
         }        
 
       }
