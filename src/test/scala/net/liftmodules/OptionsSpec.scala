@@ -7,9 +7,49 @@ package net {
   import net.liftweb.json.JsonAST.JObject
   import net.liftweb.json.JsonAST.JString
   import net.liftweb.json.JsonAST.JInt
+  import net.liftweb.common.Empty
 
     class OptionsSpec extends Specification {
 
+
+      "Axis " should {
+        
+        " compose correctly  " in {
+        	val a =  Axis(xaxis()).min("42").max("forty two")
+        	 
+        	a.min must_== Full("42")
+        	a.max must_== Full("forty two")
+        }
+
+        " produce correct JSON  " in {
+        	val a =  Axis(xaxis()).min("42").max("forty two")
+        	
+        	a.toJson must_==  JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two")))))  
+        }
+      }
+      
+      "Axes " should {
+        
+        " compose correctly  " in {
+        	
+          val axes = Axes().xaxis(Axis(xaxis()).min("42").max("forty two"))
+        	 
+        	axes.xaxis must_!= Empty
+        }
+
+        " produce correct JSON  " in {
+          val a1 = Axes().xaxis(Axis(xaxis()).min("42").max("forty two"))
+        	
+        	a1.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two"))))))))
+        	
+          val a2 = Axes().xaxis(Axis(xaxis()).min("42").max("forty two")).yaxis(Axis(yaxis()).min("24").max("two forty"))
+        	
+        	a2.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two"))))),JField("yaxis",JObject(List(JField("min",JString("24")),JField("max",JString("two forty"))))))))  
+        	
+        	
+        }
+      }         
+      
       "Legend " should {
         
         " compose correctly  " in {

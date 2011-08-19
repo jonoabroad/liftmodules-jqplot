@@ -140,6 +140,7 @@ package net {
       }
       
       case class Title(name:String) extends JSONable  { override def toJson = JField("title",JString(name)) }
+
       case class Axes(xaxis:Box[Axis] = Empty,yaxis:Box[Axis] = Empty,x2axis:Box[Axis] = Empty,y2axis:Box[Axis] = Empty)  extends JSONable {
         
         override def fields:List[Box[JSONable]] = List(xaxis,yaxis,x2axis,y2axis)
@@ -150,33 +151,40 @@ package net {
         def yaxis(y:Axis):Axes =  this.copy(yaxis = Full(y))
         def y2axis(y:Axis):Axes =  this.copy(y2axis = Full(y))        
         
-        def toJson = {JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson))} 
+        override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) } 
+
+        
       }
       sealed trait Renderer
       case class LinearAxisRenderer extends Renderer { override def toString = "$.jqplot.LinearAxisRenderer" }
       case class RenderOptions()  
       case class TickOptions()  
-      case class Axis(min:Box[String] = Empty,max:Box[String] = Empty,pad:Box[String] = Empty,ticks:List[String] = Nil,numberOfTicks:Box[Int],renderer:Renderer,rendererOptions:Box[RenderOptions] = Empty,
-          tickOptions:Box[TickOptions] = Empty,showTicks:Boolean = true,showTickMarks:Boolean = true) extends JSONable {
+      
+      sealed trait AxisName { override def toString = this.getClass.getSimpleName }
+      case class axesDefaults() extends AxisName 
+      case class xaxis() extends AxisName
+      case class x2axis() extends AxisName
+      case class yaxis() extends AxisName
+      case class y2axis() extends AxisName
+      
+      
+      //TODO: Add ticks
+      case class Axis(name:AxisName,min:Box[String] = Empty,max:Box[String] = Empty,pad:Box[String] = Empty,ticks:Box[List[Any]] = Empty,numberOfTicks:Box[Int] = Empty,renderer:Box[Renderer] = Empty,rendererOptions:Box[RenderOptions] = Empty,
+          tickOptions:Box[TickOptions] = Empty,showTicks:Box[Boolean] = Empty,showTickMarks:Box[Boolean] = Empty) extends JSONable {
 
         def min(m:String):Axis = this.copy(min = Full(m))
         
         def max(m:String):Axis = this.copy(max = Full(m))
         
         def pad(p:String) = this.copy(pad = Full(p))
-        
-        def tick(t:String):Axis =  {
-          val l:List[String] = this.ticks
-          this.copy(ticks = t :: l)
-        }
 
-        def ticks(l:List[String]):Axis =  this.copy(ticks = l)
+        def ticks(l:List[Any]):Axis =  this.copy(ticks = Box !! l)
         
         def numberOfTicks(i:Int):Axis = this.copy(numberOfTicks = Full(i))
                 
-        override def fields:List[Box[JSONable]] = Nil//List(min,max,pad,ticks,numberTicks,renderer,renderOptions,tickOptions,showTicks,showTickMarks)
+       private def fieldz:List[(String,Box[Any])] = List(("min",min),("max",max),("pad",pad),("ticks",ticks),("numberTicks",numberOfTicks),("renderer",renderer),("",rendererOptions),("",tickOptions),("",showTicks),("",showTickMarks))
         
-        override def toJson = {JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson))}
+        override def toJson = {JField(name.toString,JObject(for { b <- fieldz; t <- b._2 } yield JField(b._1,toJValue(t))))}
           
       }
       case class MarkerOption()  extends JSONable {
