@@ -12,6 +12,25 @@ package net {
     class OptionsSpec extends Specification {
 
 
+
+      "Series " should {
+        
+        " compose correctly  " in {
+        	val s =  Series().lineWidth(42).xaxis(xaxis())
+        	 
+
+        	Nil must_== Nil
+        }
+
+        " produce correct JSON  " in {
+        	val a =  Axis(xaxis()).min("42").max("forty two")
+        	
+        	a.toJson must_==  JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two")))))  
+        }
+      }
+      
+      
+      
       "Axis " should {
         
         " compose correctly  " in {

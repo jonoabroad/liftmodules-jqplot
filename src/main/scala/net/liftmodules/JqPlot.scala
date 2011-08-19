@@ -121,8 +121,6 @@ package net {
       }
 
       trait JSONable extends Loggable { 
-      
-        def fields:List[Box[JSONable]] = Nil
         
         def toJson:JField  
         
@@ -143,7 +141,7 @@ package net {
 
       case class Axes(xaxis:Box[Axis] = Empty,yaxis:Box[Axis] = Empty,x2axis:Box[Axis] = Empty,y2axis:Box[Axis] = Empty)  extends JSONable {
         
-        override def fields:List[Box[JSONable]] = List(xaxis,yaxis,x2axis,y2axis)
+        private def fields:List[Box[JSONable]] = List(xaxis,yaxis,x2axis,y2axis)
         
         def xaxis(x:Axis):Axes =  this.copy(xaxis = Full(x))
         def x2axis(x:Axis):Axes =  this.copy(x2axis = Full(x))
@@ -162,10 +160,12 @@ package net {
       
       sealed trait AxisName { override def toString = this.getClass.getSimpleName }
       case class axesDefaults() extends AxisName 
-      case class xaxis() extends AxisName
-      case class x2axis() extends AxisName
-      case class yaxis() extends AxisName
-      case class y2axis() extends AxisName
+      sealed trait XAxisName;
+      sealed trait YAxisName;
+      case class xaxis() extends AxisName with XAxisName
+      case class x2axis() extends AxisName with XAxisName
+      case class yaxis() extends AxisName with YAxisName
+      case class y2axis() extends AxisName with YAxisName
       
       
       //TODO: Add ticks
@@ -182,25 +182,101 @@ package net {
         
         def numberOfTicks(i:Int):Axis = this.copy(numberOfTicks = Full(i))
                 
-       private def fieldz:List[(String,Box[Any])] = List(("min",min),("max",max),("pad",pad),("ticks",ticks),("numberTicks",numberOfTicks),("renderer",renderer),("",rendererOptions),("",tickOptions),("",showTicks),("",showTickMarks))
+        private def fieldz:List[(String,Box[Any])] = List(("min",min),("max",max),("pad",pad),("ticks",ticks),("numberTicks",numberOfTicks),("renderer",renderer),("",rendererOptions),("",tickOptions),("",showTicks),("",showTickMarks))
         
         override def toJson = {JField(name.toString,JObject(for { b <- fieldz; t <- b._2 } yield JField(b._1,toJValue(t))))}
           
       }
-      case class MarkerOption()  extends JSONable {
+      sealed trait MarkerStyle
+      
+      case class circle extends MarkerStyle
+      case class diamond extends MarkerStyle
+      case class square extends MarkerStyle
+      case class filledCircle extends MarkerStyle
+      case class filledDiamond extends MarkerStyle
+      case class filledSquare extends MarkerStyle      
+      
+      case class MarkerOption(show:Box[Boolean] = Empty,
+           					  style:Box[MarkerStyle] = Empty,
+          					  lineWidth:Box[Int] = Empty,
+          					  size:Box[Int] = Empty,
+          					  color:Box[String] = Empty,
+          					  showShadow:Box[Boolean] = Empty,
+          					  shadowAngle:Box[Int] = Empty,
+          					  shadowOffset:Box[Double] = Empty,
+          					  shadowDepth:Box[Int] = Empty,
+          					  shadowAlpha:Box[Double] = Empty)  extends JSONable {
 
-        override def fields:List[Box[JSONable]] = Nil
+        def show(b:Boolean):MarkerOption = this.copy(show = Full(b))
+        def style(ms:MarkerStyle):MarkerOption = this.copy(style = Full(ms))
+        def lineWidth(w:Int):MarkerOption = this.copy(lineWidth = Full(w))
+        def size(s:Int):MarkerOption = this.copy(size = Full(s))
+        def color(c:String):MarkerOption = this.copy(color = Full(c))
         
-        override def toJson = {JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson))}        
+        def showShadow(b:Boolean):MarkerOption = this.copy(showShadow =  Full(b))
+        def shadowAngle(i:Int):MarkerOption = this.copy(shadowAngle =  Full(i))
+        def shadowOffset(d:Double):MarkerOption = this.copy(shadowOffset =  Full(d))
+        def shadowDepth(i:Int):MarkerOption = this.copy(shadowDepth =  Full(i))
+        def shadowAlpha(d:Double):MarkerOption = this.copy(shadowAlpha =  Full(d))
+
+        
+        
+       private def field:List[(String,Box[Any])] = List(("show",show),
+    		   											("style",style),
+    		   											("lineWidth",lineWidth),
+    		   											("size",size),
+    		   											("color",color),
+    		   											("shadow",showShadow),
+    		   											("shadowAngle",shadowAngle),
+    		   											("shadowOffset",shadowOffset),
+    		   											("shadowDepth",shadowDepth),
+    		   											("shadowAlpha",shadowAlpha))
+ 
+        
+        def fields:List[Box[JSONable]] = Nil
+        
+        override def toJson = { JField("markerOptions",JObject(for { b <- fields; t <- b } yield t.toJson)) }        
+
         
       }
-      case class Series(lineWidth:Box[Int] = Empty,markerOptions:Box[MarkerOption] = Empty) extends JSONable {
+      case class Series(
+    		  		    xaxis:Box[XAxisName] = Empty,
+    		  		    yaxis:Box[YAxisName] = Empty,
+    		  		    label:Box[String] = Empty,
+    		  			lineWidth:Box[Int] = Empty,
+    		  			showShadow:Box[Boolean] = Empty,
+                     	shadowAngle:Box[Int] = Empty,
+                     	shadowOffset:Box[Double] = Empty,
+                     	shadowWidth:Box[Int] = Empty,
+                     	shadowDepth:Box[Int] = Empty,
+                     	shadowAlpha:Box[Double] = Empty,
+                     	fill:Box[Boolean] = Empty,
+                     	fillAndStroke:Box[Boolean] = Empty,
+                     	fillColor:Box[String] = Empty,
+                     	fillAlpha:Box[Double] = Empty,                     	
+    		  			renderer:Box[Renderer] = Empty,
+    		  			rendererOptions:Box[RenderOptions] = Empty,
+    		  			markerOptions:Box[MarkerOption] = Empty    		  			
+    		  			) extends JSONable {
 
+        def xaxis(axis:XAxisName):Series =  this.copy(xaxis = Box !! axis)
+        def yaxis(axis:YAxisName):Series =  this.copy(yaxis = Box !! axis)
         def lineWidth(w:Int):Series = this.copy(lineWidth = Full(w))
-        
+        def showShadow(b:Boolean):Series = this.copy(showShadow =  Full(b))
+        def shadowAngle(i:Int):Series = this.copy(shadowAngle =  Full(i))
+        def shadowOffset(d:Double):Series = this.copy(shadowOffset =  Full(d))
+        def shadowWidth(i:Int):Series = this.copy(shadowWidth =  Full(i))
+        def shadowDepth(i:Int):Series = this.copy(shadowDepth =  Full(i))
+        def shadowAlpha(d:Double):Series = this.copy(shadowAlpha =  Full(d))
+        def fill(b:Boolean):Series = this.copy(fill = Full(b))
+        def fillAndStroke(b:Boolean):Series = this.copy(fillAndStroke = Full(b))
+        def fillColor(c:String):Series = this.copy(fillColor = Full(c))
+        def fillAlpha(d:Double):Series = this.copy(fillAlpha = Full(d))
+        def renderer(r:Renderer):Series = this.copy(renderer = Full(r))
+        def rendererOptions(r:RenderOptions):Series = this.copy(rendererOptions = Full(r))
         def markerOptions(m:MarkerOption):Series = this.copy(markerOptions = Full(m))
         
-        override def fields:List[Box[JSONable]] = Nil
+        def fields:List[Box[JSONable]] = Nil
         
         override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) }        
         
@@ -228,11 +304,19 @@ package net {
         override def toJson = { JField("legend",JObject(for { b <- fieldz; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
         
       }
-      case class Grid(drawGridLines:Box[Boolean] = Empty,gridLineColor:Box[String] = Empty,background:Box[String] = Empty,
-                      borderColor:Box[String] = Empty,borderWidth:Box[Double] = Empty,shadow:Box[Boolean] = Empty,
-                      shadowAngle:Box[Int] = Empty,shadowOffset:Box[Double] = Empty,shadowWidth:Box[Int] = Empty,
-                      shadowDepth:Box[Int] = Empty,shadowAlpha:Box[Double] = Empty,renderer:Box[Renderer] = Empty,
-                      rendererOptions:Box[RenderOptions] = Empty)  extends JSONable{
+      case class Grid(drawGridLines:Box[Boolean] = Empty,
+    		  		 gridLineColor:Box[String] = Empty,
+    		  		 background:Box[String] = Empty,
+                     borderColor:Box[String] = Empty,
+                     borderWidth:Box[Double] = Empty,
+                     renderer:Box[Renderer] = Empty,
+                     rendererOptions:Box[RenderOptions] = Empty,
+                     showShadow:Box[Boolean] = Empty,
+                     shadowAngle:Box[Int] = Empty,
+                     shadowOffset:Box[Double] = Empty,
+                     shadowWidth:Box[Int] = Empty,
+                     shadowDepth:Box[Int] = Empty,
+                     shadowAlpha:Box[Double] = Empty) extends JSONable{
 
         def drawGridLines(b:Boolean):Grid = this.copy(drawGridLines = Full(b))
         
@@ -243,8 +327,12 @@ package net {
         def borderColor(s:String):Grid = this.copy(borderColor =  Full(s))
         
         def borderWidth(d:Double):Grid = this.copy(borderWidth =  Full(d))
-
-        def shadow(b:Boolean):Grid = this.copy(shadow =  Full(b))
+        
+        def renderer(r:Renderer):Grid = this.copy(renderer = Full(r))
+        
+        def rendererOptions(r:RenderOptions):Grid = this.copy(rendererOptions = Full(r))
+        
+        def showShadow(b:Boolean):Grid = this.copy(showShadow =  Full(b))
         
         def shadowAngle(i:Int):Grid = this.copy(shadowAngle =  Full(i))
         
@@ -256,19 +344,24 @@ package net {
         
         def shadowAlpha(d:Double):Grid = this.copy(shadowAlpha =  Full(d))
         
-        def renderer(r:Renderer):Grid = this.copy(renderer = Full(r))
         
-        def rendererOptions(r:RenderOptions):Grid = this.copy(rendererOptions = Full(r))
+       private val fields:List[(String,Box[Any])] = List(("drawGridLines",drawGridLines),
+    		   											("gridLineColor",gridLineColor),
+    		   											("background",background),
+    		   											("borderWidth",borderWidth),
+    		   											("shadow",showShadow),
+    		   											("shadowAngle",shadowAngle),
+    		   											("shadowOffset",shadowOffset),
+    		   											("shadowDepth",shadowDepth),
+    		   											("shadowWidth",shadowWidth),
+    		   											("shadowAlpha",shadowAlpha),
+    		   											("renderer",renderer),
+    		   											("rendererOptions",rendererOptions))
+
         
-        
-        
-        
-        override def fields:List[Box[JSONable]] = Nil
-        
-        override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) }        
+        override def toJson = { JField("grid",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
         
       }
-      
  
   }
 }
