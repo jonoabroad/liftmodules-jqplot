@@ -184,6 +184,7 @@ package net {
       
       //TODO: Add ticks
       case class Axis(name:AxisName,
+    		  		  label:Option[String] = None,
     		  		  min:Option[String] = None,
     		  		  max:Option[String] = None,
                       pad:Option[String] = None,
@@ -195,6 +196,8 @@ package net {
                       showTicks:Option[Boolean] = None,
                       showTickMarks:Option[Boolean] = None) extends JSONable {
 
+        def label(l:String):Axis = this.copy(label = Some(l))
+        
         def min(m:String):Axis = this.copy(min = Some(m))
         
         def max(m:String):Axis = this.copy(max = Some(m))
@@ -215,7 +218,8 @@ package net {
         
         def showTickMarks(b:Boolean):Axis = this.copy(showTickMarks = Some(b))
         
-        private def fields:List[(String,Option[Any])] = List(("min",min),
+        private def fields:List[(String,Option[Any])] = List(("label",label),
+        													 ("min",min),
         													 ("max",max),
         													 ("pad",pad),
         													 ("ticks",ticks),
