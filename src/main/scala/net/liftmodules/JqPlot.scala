@@ -397,12 +397,13 @@ package net {
         										 
         def toJObject = { JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))) }
         
-        override def toJson = { JField("seriesDefault",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
+        override def toJson = { JField("seriesDefaults",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
         
         override val possible_renderers = List(renderer,markerOptions)
       
       }  
       
+      //THIS IS WRONG, N,E,S,W are wrong should only be a single letter.
       sealed trait Location { override def toString = this.getClass.getSimpleName.toLowerCase() }
       case class NW() extends Location 
       case class NO() extends Location 
