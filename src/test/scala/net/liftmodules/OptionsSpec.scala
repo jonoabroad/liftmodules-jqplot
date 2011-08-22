@@ -138,6 +138,33 @@ package net {
         		   	        						     JField("showTickMarks",JBool(true))))))))))
              
         }
+        
+        " produce correct plugin lists" in {
+          
+          Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer())).renderers must_== List(DateAxisRenderer())
+          
+           val o1 =  Options().title("example").axes(Axes().xaxis(Axis(xaxis()).min("42").max("forty two").showTickMarks(true)))
+        	
+           o1.plugins must_== List()
+
+           val o2 =  Options().title("Default Date axis").axes(Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer()))).
+           seriesDefault(Series().lineWidth(4).markerOptions(MarkerOption().style(square())))
+        	
+           o2.plugins must_== List(DateAxisRenderer())           
+
+           val o3 =  Options().title("Pie chart example").seriesDefault(Series().renderer(PieRenderer()))
+        	
+           o3.plugins must_== List(PieRenderer())        		   	        						     
+
+           
+           val o4 =  Options().title("Bar chart example").seriesDefault(Series().renderer(BarRenderer())).axes(Axes().yaxis(Axis(yaxis()).renderer(CategoryAxisRenderer())))
+        	
+           o4.plugins must_== List(CategoryAxisRenderer(),BarRenderer())
+           
+           val o5 = Options().title("bubble chart").seriesDefault(Series().renderer(BubbleRenderer()))
+           o5.plugins must_== List(BubbleRenderer())
+        		   	        						     
+        }        
       }      
     }
   }

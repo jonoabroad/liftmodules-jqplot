@@ -51,11 +51,9 @@ package net {
 
        val plugins = options match {
          case  Some(op) =>
-           		for { plugin <- op.plugins } yield <script type="text/javascript" src={"%s/%s/js/plugins/jqplot.%s%s".format(S.contextPath,LiftRules.resourceServerPath,plugin,version)}></script>
+           		for { plugin <- op.plugins } yield <script type="text/javascript" src={"%s/%s/js/plugins/jqplot.%s%s".format(S.contextPath,LiftRules.resourceServerPath,plugin.name,version)}></script>
          case otherwise => Nil   
         }     
-        
-        logger.info("plugins %s".format(plugins))
         
         def toCssTransformer:NodeSeq => NodeSeq = { _ => toHtml}
         
@@ -134,18 +132,11 @@ package net {
         
         def series(s:List[Series]):Options = this.copy(series = Some(MultipleSeries(Some(s))))        
         
-        private val pluginsList = List( "barRenderer","BezierCurveRenderer","blockRenderer",
-            "bubbleRenderer","trendline","pointLabel","pieRenderer","ohlcRenderer",
-            "meterGaugeRenderer","mekkoRenderer", "logAxisRenderer","json2",
-            "highlighter","funnelRenderer","enhancedLegendRenderer","dragable",
-            "donutRenderer","dateAxisRenderer","canvasAxisLabelRenderer",
-            "canvasAxisTickRenderer","canvasOverlay","canvasTextRenderer",
-            "categoryAxisRenderer","ciParser","cursor")
+        private def fields = List(title,axes,legend,grid,seriesDefault,series)
         
+        private val renderers:List[Option[Renderable]] = List(axisDefault,axes,seriesDefault,grid)  
         
-        def plugins:List[String] = {Nil}
-        
-        def fields = List(title,axes,legend,grid,seriesDefault,series)
+        def plugins = (for { b <- renderers; render <- b } yield render.renderers).flatten.distinct
         
         def toJson = JObject(for { b <- fields; t <- b } yield t.toJson) 
         
@@ -156,26 +147,39 @@ package net {
         def toJson:JField  
         
         protected def toJValue(x:Any) = x match {
-          case s:String => JString(s)
-          case i:Int => JInt(i)
-          case d:Double => JDouble(d)
-          case l:Location => JString(l.toString())
-          case b:Boolean => JBool(b)
-          case r:Renderer => JString(r.toString())
+          case s:String       => JString(s)
+          case i:Int          => JInt(i)
+          case d:Double       => JDouble(d)
+          case l:Location     => JString(l.toString())
+          case b:Boolean      => JBool(b)
+          case r:Renderer     => JString(r.toString())
           case m:MarkerOption => m.toJObject
-          case m:MarkerStyle => JString(m.toString())
-          case j:JSONable => j.toJson
-          case otherwise => 
-            logger.error("We didn't cater for %s, sorry.".format(otherwise))
+          case m:MarkerStyle  => JString(m.toString())
+          case j:JSONable 	  => j.toJson
+          case otherwise      => logger.error("We didn't cater for %s, sorry.".format(otherwise))
             JNull
           
         } 
         
       }
       
+      trait Renderable {
+        
+        val possible_renderers:List[Option[Any]]
+        
+        def renderers:List[Renderer] = {
+          val r = for { b <- possible_renderers; render <- b} yield {  
+           if (render.isInstanceOf[Renderable]){ render.asInstanceOf[Renderable].renderers}
+           else if (render.isInstanceOf[Renderer]) { List(render.asInstanceOf[Renderer]):List[Renderer]}
+           else Nil:List[Renderer]
+          }
+          r.flatten
+          } 
+      }
+      
       case class Title(name:String) extends JSONable  { override def toJson = JField("title",JString(name)) }
 
-      case class Axes(xaxis:Option[Axis] = None,yaxis:Option[Axis] = None,x2axis:Option[Axis] = None,y2axis:Option[Axis] = None)  extends JSONable {
+      case class Axes(xaxis:Option[Axis] = None,yaxis:Option[Axis] = None,x2axis:Option[Axis] = None,y2axis:Option[Axis] = None)  extends JSONable with Renderable{
         
         private def fields:List[Option[JSONable]] = List(xaxis,yaxis,x2axis,y2axis)
         
@@ -185,15 +189,33 @@ package net {
         def yaxis(y:Axis):Axes =  this.copy(yaxis = Some(y))
         def y2axis(y:Axis):Axes =  this.copy(y2axis = Some(y))        
         
-        override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) } 
+        override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) }
+
+        override val possible_renderers:List[Option[Any]] = List(xaxis,yaxis,x2axis,y2axis)
         
       }
       
-      sealed trait Renderer { override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) }
+      sealed trait Renderer { 
+    	
+        def name  =  {
+          val n = this.getClass.getSimpleName
+          n.equalsIgnoreCase("BezierCurveRenderer") match {
+            case true =>  n
+            case false => n.replaceFirst(n.take(1),n.take(1).toLowerCase)
+          }
+        }
+    	override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) 
+    	  
+      }
       case class DateAxisRenderer() extends Renderer   
       case class LinearAxisRenderer() extends Renderer 
-      case class RenderOptions()  
-      case class TickOptions()  
+      case class PieRenderer() extends Renderer
+      case class BarRenderer() extends Renderer
+      case class CategoryAxisRenderer() extends Renderer
+      case class OHLCRenderer() extends Renderer
+      case class BubbleRenderer() extends Renderer
+      case class RenderOptions() extends Renderer
+      case class TickOptions() extends Renderer
       
       sealed trait AxisName { override def toString = this.getClass.getSimpleName }
       sealed trait XAxisName;
@@ -216,7 +238,7 @@ package net {
                       rendererOptions:Option[RenderOptions] = None,
                       tickOptions:Option[TickOptions] = None,
                       showTicks:Option[Boolean] = None,
-                      showTickMarks:Option[Boolean] = None) extends JSONable {
+                      showTickMarks:Option[Boolean] = None) extends JSONable with Renderable {
 
         def label(l:String):Axis = this.copy(label = Some(l))
         
@@ -253,6 +275,8 @@ package net {
         													 ("showTickMarks",showTickMarks))
         
         override def toJson = {JField(name.toString,JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}
+        
+        override val possible_renderers = List(renderer)  
           
       }
       sealed trait MarkerStyle { override def toString = this.getClass.getSimpleName.toLowerCase() }
@@ -335,7 +359,7 @@ package net {
     		  			renderer:Option[Renderer] = None,
     		  			rendererOptions:Option[RenderOptions] = None,
     		  			markerOptions:Option[MarkerOption] = None    		  			
-    		  			) extends JSONable {
+    		  			) extends JSONable with Renderable{
 
         def xaxis(axis:XAxisName):Series =  this.copy(xaxis = Option(axis)) 
         def yaxis(axis:YAxisName):Series =  this.copy(yaxis = Option(axis))
@@ -374,6 +398,8 @@ package net {
         def toJObject = { JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))) }
         
         override def toJson = { JField("seriesDefault",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
+        
+        override val possible_renderers = List(renderer,markerOptions)
       
       }  
       
@@ -411,7 +437,7 @@ package net {
                      shadowOffset:Option[Double] = None,
                      shadowWidth:Option[Int] = None,
                      shadowDepth:Option[Int] = None,
-                     shadowAlpha:Option[Double] = None) extends JSONable{
+                     shadowAlpha:Option[Double] = None) extends JSONable with Renderable {
 
         def drawGridLines(b:Boolean):Grid = this.copy(drawGridLines = Some(b))
         
@@ -454,7 +480,9 @@ package net {
     		   											("rendererOptions",rendererOptions))
 
         
-        override def toJson = { JField("grid",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
+        override def toJson = { JField("grid",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
+        
+        override val possible_renderers = List(renderer)
         
       }
  
