@@ -94,9 +94,28 @@ package net {
       }
       
       
-      case class Options(title:Option[Title] = None,axes:Option[Axes] = None,series:Option[List[Series]] = None,legend:Option[Legend] = None,grid:Option[Grid] = None) {
+      case class Options(title:Option[Title] = None,
+    		  			 axisDefault:Option[Axis] = None,
+    		  			 axes:Option[Axes] = None,
+    		  			 seriesDefault:Option[Series] = None,
+    		  			 series:Option[MultipleSeries] = None,
+                         legend:Option[Legend] = None,
+                         grid:Option[Grid] = None) {
         
-                
+        def title(t:String):Options = this.copy(title = Some(Title(t)))
+        
+        def legend(l:Legend):Options = this.copy(legend = Some(l))
+        
+        def grid(g:Grid):Options = this.copy(grid = Some(g))
+        
+        def axisDefault(a:Axis):Options = this.copy(axisDefault = Some(a))
+        
+        def axes(a:Axes):Options = this.copy(axes = Some(a))
+        
+        def seriesDefault(s:Series):Options = this.copy(seriesDefault = Some(s))
+        
+        def series(s:List[Series]):Options = this.copy(series = Some(MultipleSeries(Some(s))))        
+        
         private val pluginsList = List( "barRenderer","BezierCurveRenderer","blockRenderer",
             "bubbleRenderer","trendline","pointLabel","pieRenderer","ohlcRenderer",
             "meterGaugeRenderer","mekkoRenderer", "logAxisRenderer","json2",
@@ -108,15 +127,9 @@ package net {
         
         def plugins:List[String] = {Nil}
         
-        def fields = List(title,axes,legend,grid)
+        def fields = List(title,axes,legend,grid,seriesDefault,series)
         
-        def toJson = { JObject(for { b <- fields; t <- b } yield t.toJson) } 
-       
-        def title(t:String):Options = this.copy(title = Some(Title(t)))
-        
-        def legend(l:Legend):Options = this.copy(legend = Some(l))
-        
-        def grid(g:Grid):Options = this.copy(grid = Some(g))
+        def toJson = JObject(for { b <- fields; t <- b } yield t.toJson) 
         
       }
 
@@ -129,6 +142,8 @@ package net {
           case i:Int => JInt(i)
           case d:Double => JDouble(d)
           case l:Location => JString(l.toString())
+          case b:Boolean => JBool(b)
+          case j:JSONable => j.toJson
           case otherwise => 
             logger.error("We didn't cater for %s, sorry.".format(otherwise))
             JNull
@@ -150,16 +165,15 @@ package net {
         def y2axis(y:Axis):Axes =  this.copy(y2axis = Some(y))        
         
         override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) } 
-
         
       }
+      
       sealed trait Renderer
-      case class LinearAxisRenderer extends Renderer { override def toString = "$.jqplot.LinearAxisRenderer" }
+      case class LinearAxisRenderer() extends Renderer { override def toString = "$.jqplot.LinearAxisRenderer" }
       case class RenderOptions()  
       case class TickOptions()  
       
       sealed trait AxisName { override def toString = this.getClass.getSimpleName }
-      case class axesDefaults() extends AxisName 
       sealed trait XAxisName;
       sealed trait YAxisName;
       case class xaxis() extends AxisName with XAxisName
@@ -169,8 +183,17 @@ package net {
       
       
       //TODO: Add ticks
-      case class Axis(name:AxisName,min:Option[String] = None,max:Option[String] = None,pad:Option[String] = None,ticks:Option[List[Any]] = None,numberOfTicks:Option[Int] = None,renderer:Option[Renderer] = None,rendererOptions:Option[RenderOptions] = None,
-          tickOptions:Option[TickOptions] = None,showTicks:Option[Boolean] = None,showTickMarks:Option[Boolean] = None) extends JSONable {
+      case class Axis(name:AxisName,
+    		  		  min:Option[String] = None,
+    		  		  max:Option[String] = None,
+                      pad:Option[String] = None,
+                      ticks:Option[List[Any]] = None,
+                      numberOfTicks:Option[Int] = None,
+                      renderer:Option[Renderer] = None,
+                      rendererOptions:Option[RenderOptions] = None,
+                      tickOptions:Option[TickOptions] = None,
+                      showTicks:Option[Boolean] = None,
+                      showTickMarks:Option[Boolean] = None) extends JSONable {
 
         def min(m:String):Axis = this.copy(min = Some(m))
         
@@ -182,19 +205,37 @@ package net {
         
         def numberOfTicks(i:Int):Axis = this.copy(numberOfTicks = Some(i))
                 
-        private def fieldz:List[(String,Option[Any])] = List(("min",min),("max",max),("pad",pad),("ticks",ticks),("numberTicks",numberOfTicks),("renderer",renderer),("",rendererOptions),("",tickOptions),("",showTicks),("",showTickMarks))
+        def renderer(r:Renderer):Axis = this.copy(renderer = Some(r))
         
-        override def toJson = {JField(name.toString,JObject(for { b <- fieldz; t <- b._2 } yield JField(b._1,toJValue(t))))}
+        def rendererOptions(r:RenderOptions):Axis = this.copy(rendererOptions = Some(r))
+        
+        def tickOptions(t:TickOptions):Axis = this.copy(tickOptions = Some(t))
+        
+        def showTicks(b:Boolean):Axis = this.copy(showTicks = Some(b))
+        
+        def showTickMarks(b:Boolean):Axis = this.copy(showTickMarks = Some(b))
+        
+        private def fields:List[(String,Option[Any])] = List(("min",min),
+        													 ("max",max),
+        													 ("pad",pad),
+        													 ("ticks",ticks),
+        													 ("numberTicks",numberOfTicks),
+        													 ("renderer",renderer),
+        													 ("rendererOptions",rendererOptions),
+        													 ("tickOptions",tickOptions),
+        													 ("showTicks",showTicks),
+        													 ("showTickMarks",showTickMarks))
+        
+        override def toJson = {JField(name.toString,JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}
           
       }
-      sealed trait MarkerStyle
-      
-      case class circle extends MarkerStyle
-      case class diamond extends MarkerStyle
-      case class square extends MarkerStyle
-      case class filledCircle extends MarkerStyle
-      case class filledDiamond extends MarkerStyle
-      case class filledSquare extends MarkerStyle      
+      sealed trait MarkerStyle { override def toString = this.getClass.getSimpleName.toLowerCase() }
+      case class circle() extends MarkerStyle
+      case class diamond() extends MarkerStyle
+      case class square() extends MarkerStyle
+      case class filledCircle() extends MarkerStyle
+      case class filledDiamond() extends MarkerStyle
+      case class filledSquare() extends MarkerStyle      
       
       case class MarkerOption(show:Option[Boolean] = None,
            					  style:Option[MarkerStyle] = None,
@@ -239,8 +280,19 @@ package net {
 
         
       }
-      case class Series(
-    		  		    xaxis:Option[XAxisName] = None,
+      
+      case class MultipleSeries(ss:Option[List[Series]] = None) extends JSONable {
+        
+        def series(l:List[Series]):MultipleSeries = this.copy(ss =  Some(l))
+        
+        override  def toJson = ss match {
+          case Some(l) => JField("series",JArray(for {s <- l } yield s.toJObject	)) 
+          case None => JField("series",JArray(List()))
+        } 
+        
+      }
+      
+      case class Series(xaxis:Option[XAxisName] = None,
     		  		    yaxis:Option[YAxisName] = None,
     		  		    label:Option[String] = None,
     		  			lineWidth:Option[Int] = None,
@@ -276,21 +328,38 @@ package net {
         def rendererOptions(r:RenderOptions):Series = this.copy(rendererOptions = Some(r))
         def markerOptions(m:MarkerOption):Series = this.copy(markerOptions = Some(m))
         
-        def fields:List[Option[JSONable]] = Nil
+        def fields:List[(String,Option[Any])] = List(("xaxis",xaxis),("yaxis",yaxis),
+        											 ("lineWidth",lineWidth),
+        											 ("showShadow",showShadow),
+        											 ("shadowAngle",shadowAngle),
+        										     ("shadowOffset",shadowOffset),
+        										     ("shadowWidth",shadowWidth),
+        										     ("shadowDepth",shadowDepth),
+        										     ("shadowAlpha",shadowAlpha),
+        										     ("fill",fill),
+        										     ("fillAndStroke",fillAndStroke),
+        										     ("fillColor",fillColor),
+        										     ("fillAlpha",fillAlpha),
+        										     ("renderer",renderer),
+        										     ("rendererOptions",rendererOptions),
+        										     ("markerOptions",markerOptions))
+        										        
+        										 
+        def toJObject = { JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))) }
         
-        override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) }        
-        
+        override def toJson = { JField("seriesDefault",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
+      
       }  
       
-      sealed trait Location
-      case class NW() extends Location { override def toString = "nw" }
-      case class NO() extends Location  { override def toString = "n" }
-      case class NE() extends Location { override def toString = "ne" }
-      case class EA() extends Location  { override def toString = "e" }
-      case class SE() extends Location { override def toString = "se" }
-      case class SO() extends Location  { override def toString = "s" }
-      case class SW() extends Location { override def toString = "sw" }
-      case class WE() extends Location  { override def toString = "w" }
+      sealed trait Location { override def toString = this.getClass.getSimpleName.toLowerCase() }
+      case class NW() extends Location 
+      case class NO() extends Location 
+      case class NE() extends Location 
+      case class EA() extends Location 
+      case class SE() extends Location 
+      case class SO() extends Location 
+      case class SW() extends Location 
+      case class WE() extends Location 
 
       //Missing show. Assumption, if you don't want to show the legend, don't include it. 
       case class Legend(location:Option[Location] = None,xoffset:Option[Int] = None,yoffset:Option[Int] = None)  extends JSONable{
@@ -299,9 +368,9 @@ package net {
         def xoffset(x:Int):Legend = this.copy(xoffset = Some(x))
         def yoffset(y:Int):Legend = this.copy(yoffset = Some(y))
         
-        private def fieldz:List[(String,Option[Any])] = List(("location",location),("xoffset",xoffset),("yoffset",yoffset))
+        private def fields:List[(String,Option[Any])] = List(("location",location),("xoffset",xoffset),("yoffset",yoffset))
        
-        override def toJson = { JField("legend",JObject(for { b <- fieldz; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
+        override def toJson = { JField("legend",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
         
       }
       case class Grid(drawGridLines:Option[Boolean] = None,
