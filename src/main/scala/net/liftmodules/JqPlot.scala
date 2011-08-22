@@ -69,15 +69,33 @@ package net {
               }
               )
               })}.toList
+              val hack = JsRaw("""function _hackJsonFunctions(json) {
+            //https://bitbucket.org/cleonello/jqplot/issue/139/allows-basic-json-to-work-with-jqplot
+	        //the json sent by the server CAN NOT contain functions because js functions are not
+            //printable in the JSON standard !
+            //so we need this little hack to be able to do an eval on the functions
+	            for (var k in json) {
+	            if (typeof json[k] == 'function') {
+	                continue;
+	            }
+	            if (typeof json[k] == 'object') {
+	                json[k] = _hackJsonFunctions(json[k]);
+	            }
+	            if (k == 'renderer') {
+	                json[k] = eval(json[k]);
+	            }
+	            }
+	        	return json;
+            }""")
               
             val onLoadJs = {
   
                 val y = new JsCrVar("series",JArray(jsonSeries))
-                val z = Run("$.jqplot('%s',series,options);".format(id))
+                val z = Run("$.jqplot('%s',series, _hackJsonFunctions(options));".format(id))
          
                 options match {
-                  case Some(o) =>  OnLoad( new JsCrVar("options",o.toJson) & y & z )
-                  case otherwise => OnLoad(new JsCrVar("options","") &  y & z ) 
+                  case Some(o) =>  OnLoad( new JsCrVar("options",o.toJson) & y & z & hack)
+                  case otherwise => OnLoad(new JsCrVar("options","") &  y & z & hack) 
                 }
               }
         <span>
