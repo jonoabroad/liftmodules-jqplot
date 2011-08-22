@@ -143,6 +143,9 @@ package net {
           case d:Double => JDouble(d)
           case l:Location => JString(l.toString())
           case b:Boolean => JBool(b)
+          case r:Renderer => JString(r.toString())
+          case m:MarkerOption => m.toJObject
+          case m:MarkerStyle => JString(m.toString())
           case j:JSONable => j.toJson
           case otherwise => 
             logger.error("We didn't cater for %s, sorry.".format(otherwise))
@@ -168,8 +171,9 @@ package net {
         
       }
       
-      sealed trait Renderer
-      case class LinearAxisRenderer() extends Renderer { override def toString = "$.jqplot.LinearAxisRenderer" }
+      sealed trait Renderer { override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) }
+      case class DateAxisRenderer() extends Renderer   
+      case class LinearAxisRenderer() extends Renderer 
       case class RenderOptions()  
       case class TickOptions()  
       
@@ -266,7 +270,7 @@ package net {
 
         
         
-       private def field:List[(String,Option[Any])] = List(("show",show),
+       private def fields:List[(String,Option[Any])] = List(("show",show),
     		   											("style",style),
     		   											("lineWidth",lineWidth),
     		   											("size",size),
@@ -276,11 +280,11 @@ package net {
     		   											("shadowOffset",shadowOffset),
     		   											("shadowDepth",shadowDepth),
     		   											("shadowAlpha",shadowAlpha))
- 
         
-        def fields:List[Option[JSONable]] = Nil
+        def toJObject:JObject = { JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))}
         
-        override def toJson = { JField("markerOptions",JObject(for { b <- fields; t <- b } yield t.toJson)) }        
+        
+        override def toJson = { JField("markerOptions",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}
 
         
       }

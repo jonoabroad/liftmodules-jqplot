@@ -6,20 +6,17 @@ package net {
 
     class OptionsSpec extends Specification {
 
-
-
       "Series " should {
         
-        " compose correctly  " in {
-        	val s =  Series().lineWidth(42).xaxis(xaxis())  	 
-
-        	Nil must_== Nil
-        }
-
         " produce correct JSON  " in {
-        	val a =  Axis(xaxis()).min("42").max("forty two")
-        	
-        	a.toJson must_==  JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two")))))  
+          
+          val s = Series().lineWidth(42).markerOptions(MarkerOption().style(circle()))
+
+          s.toJObject must_==  JObject(List(
+        		  					JField("lineWidth",JInt(42)),
+        		  					JField("markerOptions",JObject(List(
+        		  												JField("style",JString("circle")))						
+        		  					))))  
         }
       }
       
@@ -51,6 +48,11 @@ package net {
         	
         	a1.toJson must_==  JField("yaxis",JObject(List(JField("pad",JString("padding")),JField("numberTicks",JInt(42)),JField("showTicks",JBool(true)),JField("showTickMarks",JBool(true)))))
 
+        	val a2 = Axis(xaxis()).renderer(DateAxisRenderer())
+        	
+        	a2.toJson must_==  JField("xaxis",JObject(List(JField("renderer",JString("$.jqplot.DateAxisRenderer")))))
+
+        	
         	
         }
       }
@@ -95,6 +97,19 @@ package net {
         	    JField("yoffset",JInt(12)))))  
         }
       }
+      
+      "MarkerOption " should {
+        
+        " compose correctly  " in {
+        	MarkerOption().style(circle()).style must_== Some(circle())
+        	
+        }
+
+        " produce correct JSON  " in {
+        	
+        	MarkerOption().style(circle()).toJson must_==  JField("markerOptions",JObject(List(JField("style",JString("circle")))))  
+        }
+      }      
       
       "Options " should {
         
