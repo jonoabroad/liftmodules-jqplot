@@ -15,7 +15,7 @@ And then include this dependency:
 
 In your application's Boot.boot code:
 
-  bootstrap.liftmodules.GoogleAnalytics.init
+  net.liftmodules.jqlot.JqPlot.init
 
 ## Supported Scala and Lift versions
 
