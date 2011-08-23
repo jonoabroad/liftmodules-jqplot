@@ -1,5 +1,7 @@
 JqPlot Module 
 
+ Uses JqPlot = 1.0.0b2_r792
+
 
 TODO : 
  * get pie chart working correctly
