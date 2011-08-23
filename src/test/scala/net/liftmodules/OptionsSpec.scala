@@ -168,9 +168,9 @@ package net {
            
            val o6 = Options().title("OHLC").
            axes(Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer()))).
-           series(List(Series().renderer(ohlcRenderer())))
+           series(List(Series().renderer(OHLCRenderer())))
            
-           o6.plugins must_== List(DateAxisRenderer(),ohlcRenderer())	   	        						     
+           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())	   	        						     
         }    
         
       }    

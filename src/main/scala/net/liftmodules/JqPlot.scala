@@ -201,11 +201,12 @@ package net {
       sealed trait Renderer { 
     	
         def name  =  {
-          val n = this.getClass.getSimpleName
-          n.equalsIgnoreCase("BezierCurveRenderer") match {
-            case true =>  n
-            case false => n.replaceFirst(n.take(1),n.take(1).toLowerCase)
+          this.getClass.getSimpleName match {
+            case n @ "BezierCurveRenderer" => n
+            case n @ "OHLCRenderer" => "ohlcRenderer"
+            case n => n.replaceFirst(n.take(1),n.take(1).toLowerCase)
           }
+          
         }
     	override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) 
     	  
@@ -216,7 +217,7 @@ package net {
       case class PieRenderer() extends Renderer
       case class BarRenderer() extends Renderer
       case class CategoryAxisRenderer() extends Renderer
-      case class ohlcRenderer() extends Renderer
+      case class OHLCRenderer() extends Renderer
       case class BubbleRenderer() extends Renderer
       case class RenderOptions() extends Renderer
       case class TickOptions() extends Renderer
