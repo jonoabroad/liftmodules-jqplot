@@ -2,9 +2,11 @@ name := "JqPlot"
  
 scalaVersion := "2.9.0-1"
 
-version := "2.4-M3"
+version := "2.4-M3-0.1.0"
 
 organization := "net.liftmodules"
+ 
+scalacOptions ++= Seq("-unchecked", "-deprecation")
  
 // If using JRebel
 jettyScanDirs := Nil
@@ -21,5 +23,5 @@ libraryDependencies ++= Seq(
     "org.specs2" %% "specs2" % "1.5"  % "test",
     "org.specs2" %% "specs2-scalaz-core" % "6.0.RC2" % "test",
     "javax.servlet" % "servlet-api" % "2.5" % "provided->default",
-    "ch.qos.logback" % "logback-classic" % "0.9.26" % "compile->default" // Logging
+    "ch.qos.logback" % "logback-classic" % "0.9.29" % "compile->default" // Logging
   )
