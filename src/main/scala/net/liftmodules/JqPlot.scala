@@ -156,6 +156,7 @@ package net {
           case r:Renderer     => JString(r.toString())
           case m:MarkerOption => m.toJObject
           case m:MarkerStyle  => JString(m.toString())
+          case a:AxisName     => JString(a.toString())          
           case j:JSONable 	  => j.toJson
           case otherwise      => logger.error("We didn't cater for %s, sorry.".format(otherwise))
             JNull
@@ -218,9 +219,9 @@ package net {
       case class RenderOptions() extends Renderer
       case class TickOptions() extends Renderer
       
-      sealed trait AxisName { override def toString = this.getClass.getSimpleName }
-      sealed trait XAxisName;
-      sealed trait YAxisName;
+      sealed trait AxisName  { override def toString = this.getClass.getSimpleName }
+      sealed trait XAxisName extends AxisName
+      sealed trait YAxisName extends AxisName 
       case class xaxis() extends AxisName with XAxisName
       case class x2axis() extends AxisName with XAxisName
       case class yaxis() extends AxisName with YAxisName
@@ -274,6 +275,8 @@ package net {
         													 ("tickOptions",tickOptions),
         													 ("showTicks",showTicks),
         													 ("showTickMarks",showTickMarks))
+        													 
+        													 
         
         override def toJson = {JField(name.toString,JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}
         
