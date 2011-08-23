@@ -21,7 +21,6 @@ libraryDependencies ++= {
 // Customize any further dependencies as desired
 libraryDependencies ++= Seq(
     "org.specs2" %% "specs2" % "1.5"  % "test",
-    "org.specs2" %% "specs2-scalaz-core" % "6.0.RC2" % "test",
     "javax.servlet" % "servlet-api" % "2.5" % "provided->default",
-    "ch.qos.logback" % "logback-classic" % "0.9.29" % "compile->default" // Logging
+    "ch.qos.logback" % "logback-classic" % "0.9.29" % "compile->default" 
   )
