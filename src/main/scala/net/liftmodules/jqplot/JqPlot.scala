@@ -6,7 +6,7 @@ package net {
   import scala.collection.mutable.Map
   import scala.xml.{Comment,NodeSeq}
   
-  import liftweb.common.{Loggable }
+  import liftweb.common.Loggable
   import liftweb.http.{ LiftRules, S,ResourceServer }
   import liftweb.http.js.JE.{JsRaw,JsVar}
   import liftweb.http.js.JsCmds._
