@@ -133,16 +133,16 @@ package net {
         
         def series(s:List[Series]):Options = this.copy(series = Some(MultipleSeries(Some(s))))        
         
-        private def fields = List(title,axes,legend,grid,seriesDefault,series)
+        private def fields = List(title,axisDefault,axes,legend,grid,seriesDefault,series)
         
-        private val renderers:List[Option[Renderable]] = List(axisDefault,axes,seriesDefault,grid)  
+        private val renderers:List[Option[Renderable]] = List(axisDefault,axes,seriesDefault,series,grid)  
         
         def plugins = (for { b <- renderers; render <- b } yield render.renderers).flatten.distinct
         
         def toJson = JObject(for { b <- fields; t <- b } yield t.toJson) 
         
       }
-
+ 
       trait JSONable extends Loggable { 
         
         def toJson:JField  
@@ -171,12 +171,13 @@ package net {
         
         def renderers:List[Renderer] = {
           val r = for { b <- possible_renderers; render <- b} yield {  
-           if (render.isInstanceOf[Renderable]){ render.asInstanceOf[Renderable].renderers}
-           else if (render.isInstanceOf[Renderer]) { List(render.asInstanceOf[Renderer]):List[Renderer]}
-           else Nil:List[Renderer]
+             if (render.isInstanceOf[Renderable]){ render.asInstanceOf[Renderable].renderers}
+             else if (render.isInstanceOf[Renderer]) {  List(render.asInstanceOf[Renderer]):List[Renderer] }
+             else if (render.isInstanceOf[List[Any]]) {(for{ i <- render.asInstanceOf[List[Any]] if i.isInstanceOf[Renderable]} yield { i.asInstanceOf[Renderable].renderers}).flatten }
+            else Nil:List[Renderer]
           }
           r.flatten
-          } 
+        } 
       }
       
       case class Title(name:String) extends JSONable  { override def toJson = JField("title",JString(name)) }
@@ -209,6 +210,7 @@ package net {
     	override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) 
     	  
       }
+      
       case class DateAxisRenderer() extends Renderer   
       case class LinearAxisRenderer() extends Renderer 
       case class PieRenderer() extends Renderer
@@ -335,9 +337,11 @@ package net {
         
       }
       
-      case class MultipleSeries(ss:Option[List[Series]] = None) extends JSONable {
+      case class MultipleSeries(ss:Option[List[Series]] = None) extends JSONable with Renderable {
         
         def series(l:List[Series]):MultipleSeries = this.copy(ss =  Some(l))
+
+        override val possible_renderers = List(ss)  
         
         override  def toJson = ss match {
           case Some(l) => JField("series",JArray(for {s <- l } yield s.toJObject	)) 
@@ -403,7 +407,7 @@ package net {
         
         override def toJson = { JField("seriesDefaults",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
         
-        override val possible_renderers = List(renderer,markerOptions)
+        override val possible_renderers = List(markerOptions,renderer)
       
       }  
       

@@ -16,7 +16,9 @@ package net {
         		  					JField("lineWidth",JInt(42)),
         		  					JField("markerOptions",JObject(List(
         		  												JField("style",JString("circle")))						
-        		  					))))  
+        		  					))))
+        		  					
+          Series().yaxis(y2axis()).toJson must_== JField("seriesDefaults",JObject(List(JField("yaxis",JString("y2axis")))))     		  					
         }
       }
       
@@ -163,9 +165,16 @@ package net {
            
            val o5 = Options().title("bubble chart").seriesDefault(Series().renderer(BubbleRenderer()))
            o5.plugins must_== List(BubbleRenderer())
-        		   	        						     
-        }        
-      }      
+           
+           val o6 = Options().title("OHLC").
+           axes(Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer()))).
+           series(List(Series().renderer(OHLCRenderer())))
+           
+           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())	   	        						     
+        }    
+        
+      }    
+      
     }
   }
 }
