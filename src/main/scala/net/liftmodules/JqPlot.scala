@@ -216,7 +216,7 @@ package net {
       case class PieRenderer() extends Renderer
       case class BarRenderer() extends Renderer
       case class CategoryAxisRenderer() extends Renderer
-      case class OHLCRenderer() extends Renderer
+      case class ohlcRenderer() extends Renderer
       case class BubbleRenderer() extends Renderer
       case class RenderOptions() extends Renderer
       case class TickOptions() extends Renderer
