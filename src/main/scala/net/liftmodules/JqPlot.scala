@@ -1,18 +1,19 @@
 package net {
   package liftmodules {
   
-  import java.text.SimpleDateFormat    
+  import java.text.SimpleDateFormat
   
   import scala.collection.mutable.Map
-  import scala.xml.NodeSeq
+  import scala.xml.{Comment,NodeSeq}
   
   import liftweb.common.{Loggable }
   import liftweb.http.{ LiftRules, S,ResourceServer }
   import liftweb.http.js.JE.{JsRaw,JsVar}
   import liftweb.http.js.JsCmds._
-  import net.liftweb.json.JsonAST._
+  import liftweb.json.JsonAST._
   import liftweb.util.{Helpers,Props}
   import liftweb.util.Props.RunModes._
+  
 
       object JqPlot extends Loggable {
         
@@ -23,10 +24,8 @@ package net {
           val coreLibraries = List("jquery.js","jquery.jqplot.js","excanvas.js","jquery.min.js","jquery.jqplot.min.js","excanvas.min.js")
           
           ResourceServer.allow({
-            case "js" ::  lib :: Nil if coreLibraries.contains(lib) => true   //This should be supplied.
-            case "js" :: "plugins" ::  plugin :: Nil => 
-              logger.info("plugin %s %s %s".format(plugin,plugin.startsWith("jqplot"), plugin.endsWith(".js")))
-              true
+            case "js" ::  lib :: Nil if coreLibraries.contains(lib) => true
+            case "js" :: "plugins" ::  plugin :: Nil => true
             case "css" :: "jquery.jqplot.css" :: Nil => true
           })
 
@@ -37,7 +36,7 @@ package net {
   
       class JqPlot(w:Int,h:Int,options:Option[Options],series:List[List[Any]]*) extends Loggable {
         
-       val sdf =  new SimpleDateFormat("yyyy MM dd HH:mm")
+       val sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm")
         
         val id = Helpers.nextFuncName   
         
@@ -68,10 +67,7 @@ package net {
               )
               })}.toList
               val hack = JsRaw("""function _hackJsonFunctions(json) {
-            //https://bitbucket.org/cleonello/jqplot/issue/139/allows-basic-json-to-work-with-jqplot
-	        //the json sent by the server CAN NOT contain functions because js functions are not
-            //printable in the JSON standard !
-            //so we need this little hack to be able to do an eval on the functions
+               //https://bitbucket.org/cleonello/jqplot/issue/139/allows-basic-json-to-work-with-jqplot
 	            for (var k in json) {
 	            if (typeof json[k] == 'function') {
 	                continue;
@@ -88,17 +84,22 @@ package net {
               
             val onLoadJs = {
   
-                val y = new JsCrVar("series",JArray(jsonSeries))
-                val z = Run("$.jqplot('%s',series, _hackJsonFunctions(options));".format(id))
+                val series = "series_%s".format(id)
+                val opt = "options_%s".format(id)
+                
+                val y = new JsCrVar(series,JArray(jsonSeries))
+                val z = Run("$.jqplot('%s',%s, _hackJsonFunctions(%s));".format(id,series,opt))
          
                 options match {
-                  case Some(o) =>  OnLoad( new JsCrVar("options",o.toJson) & y & z & hack)
-                  case otherwise => OnLoad(new JsCrVar("options","") &  y & z & hack) 
+                  case Some(o) =>  OnLoad( new JsCrVar(opt,o.toJson)&  hack & y & z )
+                  case otherwise => OnLoad(new JsCrVar(opt,"") &  hack & y & z  ) 
                 }
               }
+
+             val ie =  Comment("""[if lt IE 9]><script language="javascript" type="text/javascript" src="%s/%s/js/excanvas%s"></script><![endif]""".format(S.contextPath,LiftRules.resourceServerPath,version)) 
         <span>
           <head_merge>
-            <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
+            {ie}
             <script type="text/javascript" src={S.contextPath + "/" + LiftRules.resourceServerPath + "/js/jquery.jqplot" + version}></script>
 	       { plugins } 	
             <link rel="stylesheet" type="text/css" href={S.contextPath + "/" + LiftRules.resourceServerPath + "/css/jquery.jqplot.css"} />
