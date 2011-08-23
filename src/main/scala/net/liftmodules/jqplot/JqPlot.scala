@@ -1,5 +1,5 @@
 package net {
-  package liftmodules {
+  package liftmodules.jqplot {
   
   import java.text.SimpleDateFormat
   

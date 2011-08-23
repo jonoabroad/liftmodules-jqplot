@@ -1,8 +1,8 @@
 package net {
-  package liftmodules {
+  package liftmodules.jqplot {
 
   import org.specs2.mutable._
-  import net.liftweb.json.JsonAST.{JArray,JBool,JField,JInt,JObject,JString}
+  import liftweb.json.JsonAST.{JArray,JBool,JField,JInt,JObject,JString}
 
     class OptionsSpec extends Specification {
 
