@@ -15,7 +15,7 @@ package net {
         
         " correctly adds known plugins " in {
            val options = Options().title("OHLC").
-           axes(Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer()))).
+           axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
            series(List(Series().renderer(OHLCRenderer())))
           
           val jqp = new JqPlot(0, 0, Full(options),List())

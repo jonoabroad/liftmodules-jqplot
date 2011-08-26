@@ -184,16 +184,20 @@ package net {
 
       case class Axes(xaxis:Option[Axis] = None,yaxis:Option[Axis] = None,x2axis:Option[Axis] = None,y2axis:Option[Axis] = None)  extends JSONable with Renderable{
         
-        private def fields:List[Option[JSONable]] = List(xaxis,yaxis,x2axis,y2axis)
-        
         def xaxis(x:Axis):Axes =  this.copy(xaxis = Some(x))
         def x2axis(x:Axis):Axes =  this.copy(x2axis = Some(x))
 
         def yaxis(y:Axis):Axes =  this.copy(yaxis = Some(y))
         def y2axis(y:Axis):Axes =  this.copy(y2axis = Some(y))        
         
-        override def toJson = { JField("axes",JObject(for { b <- fields; t <- b } yield t.toJson)) }
-
+        
+        private def fields:List[(String,Option[Axis])] = List(("xaxis",xaxis),
+        													 ("x2axis",x2axis),
+        													 ("yaxis",yaxis),
+        													 ("y2axis",y2axis))
+        
+        override def toJson = {JField("axes",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,t.toJObject)))}        
+        
         override val possible_renderers:List[Option[Any]] = List(xaxis,yaxis,x2axis,y2axis)
         
       }
@@ -232,8 +236,7 @@ package net {
       
       
       //TODO: Add ticks
-      case class Axis(name:AxisName,
-    		  		  label:Option[String] = None,
+      case class Axis(label:Option[String] = None,
     		  		  min:Option[String] = None,
     		  		  max:Option[String] = None,
                       pad:Option[String] = None,
@@ -281,11 +284,15 @@ package net {
         													 
         													 
         
-        override def toJson = {JField(name.toString,JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}
+        def toJObject = {JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))}
         
+        def toJson = {JField("axesDefaults",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}        													 
+        													 
         override val possible_renderers = List(renderer)  
           
       }
+      
+       	
       sealed trait MarkerStyle { override def toString = this.getClass.getSimpleName.toLowerCase() }
       case class circle() extends MarkerStyle
       case class diamond() extends MarkerStyle

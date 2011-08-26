@@ -27,12 +27,12 @@ package net {
       "Axis " should {
         
         " compose correctly  " in {
-        	val a =  Axis(xaxis()).min("42").max("forty two")
+        	val a =  Axis().min("42").max("forty two")
         	 
         	a.min must_== Some("42")
         	a.max must_== Some("forty two")
         	
-        	val a1 = Axis(yaxis()).numberOfTicks(42).pad("padding").showTickMarks(true).showTicks(true)
+        	val a1 = Axis().numberOfTicks(42).pad("padding").showTickMarks(true).showTicks(true)
         	
         	a1.numberOfTicks must_== Some(42)
         	a1.showTickMarks must_== Some(true)
@@ -42,17 +42,17 @@ package net {
         }
 
         " produce correct JSON  " in {
-        	val a =  Axis(xaxis()).min("42").max("forty two")
+        	val a =  Axis().min("42").max("forty two")
         	
-        	a.toJson must_==  JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two")))))
+        	a.toJson must_==  JField("axesDefaults",JObject(List(JField("min",JString("42")),JField("max",JString("forty two")))))
         	
-        	val a1 = Axis(yaxis()).numberOfTicks(42).pad("padding").showTickMarks(true).showTicks(true)
+        	val a1 = Axis().numberOfTicks(42).pad("padding").showTickMarks(true).showTicks(true)
         	
-        	a1.toJson must_==  JField("yaxis",JObject(List(JField("pad",JString("padding")),JField("numberTicks",JInt(42)),JField("showTicks",JBool(true)),JField("showTickMarks",JBool(true)))))
+        	a1.toJson must_==  JField("axesDefaults",JObject(List(JField("pad",JString("padding")),JField("numberTicks",JInt(42)),JField("showTicks",JBool(true)),JField("showTickMarks",JBool(true)))))
 
-        	val a2 = Axis(xaxis()).renderer(DateAxisRenderer())
+        	val a2 = Axis().renderer(DateAxisRenderer())
         	
-        	a2.toJson must_==  JField("xaxis",JObject(List(JField("renderer",JString("$.jqplot.DateAxisRenderer")))))
+        	a2.toJson must_==  JField("axesDefaults",JObject(List(JField("renderer",JString("$.jqplot.DateAxisRenderer")))))
 
         	
         	
@@ -63,17 +63,17 @@ package net {
         
         " compose correctly  " in {
         	
-          val axes = Axes().xaxis(Axis(xaxis()).min("42").max("forty two"))
+          val axes = Axes().xaxis(Axis().min("42").max("forty two"))
         	 
         	axes.xaxis must_!= None
         }
 
         " produce correct JSON  " in {
-          val a1 = Axes().xaxis(Axis(xaxis()).min("42").max("forty two"))
+          val a1 = Axes().xaxis(Axis().min("42").max("forty two"))
         	
           a1.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two"))))))))
         	
-          val a2 = Axes().xaxis(Axis(xaxis()).min("42").max("forty two")).yaxis(Axis(yaxis()).min("24").max("two forty"))
+          val a2 = Axes().xaxis(Axis().min("42").max("forty two")).yaxis(Axis().min("24").max("two forty"))
         	
           a2.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two"))))),JField("yaxis",JObject(List(JField("min",JString("24")),JField("max",JString("two forty"))))))))  
         	
@@ -116,17 +116,17 @@ package net {
       "Options " should {
         
         " compose correctly  " in {
-           val a = Axes().xaxis(Axis(xaxis()).min("42").max("forty two").showTickMarks(true))
+           val a = Axes().xaxis(Axis().min("42").max("forty two").showTickMarks(true))
 
           val o =  Options().title("example").axes(a)
         	
-            o.axes must_==  Some(Axes(Some(Axis(xaxis()).min("42").max("forty two").showTickMarks(true))))
+            o.axes must_==  Some(Axes(Some(Axis().min("42").max("forty two").showTickMarks(true))))
             o.title must_== Some(Title("example"))
 
         }
 
         " produce correct JSON  " in {
-           val a = Axes().xaxis(Axis(xaxis()).min("42").max("forty two").showTickMarks(true))
+           val a = Axes().xaxis(Axis().min("42").max("forty two").showTickMarks(true))
           
            val o =  Options().title("example").axes(a)
         	
@@ -143,13 +143,13 @@ package net {
         
         " produce correct plugin lists" in {
           
-          Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer())).renderers must_== List(DateAxisRenderer())
+          Axes().xaxis(Axis().renderer(DateAxisRenderer())).renderers must_== List(DateAxisRenderer())
           
-           val o1 =  Options().title("example").axes(Axes().xaxis(Axis(xaxis()).min("42").max("forty two").showTickMarks(true)))
+           val o1 =  Options().title("example").axes(Axes().xaxis(Axis().min("42").max("forty two").showTickMarks(true)))
         	
            o1.plugins must_== List()
 
-           val o2 =  Options().title("Default Date axis").axes(Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer()))).
+           val o2 =  Options().title("Default Date axis").axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
            seriesDefault(Series().lineWidth(4).markerOptions(MarkerOption().style(square())))
         	
            o2.plugins must_== List(DateAxisRenderer())           
@@ -159,7 +159,7 @@ package net {
            o3.plugins must_== List(PieRenderer())        		   	        						     
 
            
-           val o4 =  Options().title("Bar chart example").seriesDefault(Series().renderer(BarRenderer())).axes(Axes().yaxis(Axis(yaxis()).renderer(CategoryAxisRenderer())))
+           val o4 =  Options().title("Bar chart example").seriesDefault(Series().renderer(BarRenderer())).axes(Axes().yaxis(Axis().renderer(CategoryAxisRenderer())))
         	
            o4.plugins must_== List(CategoryAxisRenderer(),BarRenderer())
            
@@ -167,7 +167,7 @@ package net {
            o5.plugins must_== List(BubbleRenderer())
            
            val o6 = Options().title("OHLC").
-           axes(Axes().xaxis(Axis(xaxis()).renderer(DateAxisRenderer()))).
+           axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
            series(List(Series().renderer(OHLCRenderer())))
            
            o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())	   	        						     
