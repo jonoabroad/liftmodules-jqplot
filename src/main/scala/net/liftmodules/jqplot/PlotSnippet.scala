@@ -15,7 +15,7 @@ trait PlotSnippet {
     
     val options:Box[Options] = Empty
     
-    val series:Array[List[List[Any]]]  = Array()
+    val series:Array[List[List[Any]]]
     
     def render = new JqPlot(w,h,options,series: _*).toCssTransformer      
       
