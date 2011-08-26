@@ -24,3 +24,7 @@ libraryDependencies ++= Seq(
     "javax.servlet" % "servlet-api" % "2.5" % "provided->default",
     "ch.qos.logback" % "logback-classic" % "0.9.29" % "compile->default" 
   )
+
+publishTo := Some("liftmodules repository" at "https://repository-liftmodules.forge.cloudbees.com/release/")
+
+credentials += Credentials("liftmodules repository", "repository-liftmodules.forge.cloudbees.com",  System.getProperty("repo.name"),  System.getProperty("repo.password"))
