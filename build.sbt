@@ -25,6 +25,8 @@ libraryDependencies ++= Seq(
     "ch.qos.logback" % "logback-classic" % "0.9.29" % "compile->default" 
   )
 
-publishTo := Some("liftmodules repository" at "https://repository-liftmodules.forge.cloudbees.com/release/")
+ // To publish to the Cloudbees repos:
 
-credentials += Credentials("liftmodules repository", "repository-liftmodules.forge.cloudbees.com",  System.getProperty("repo.name"),  System.getProperty("repo.password"))
+publishTo := Some("liftmodules repository" at "https://repository-liftmodules.forge.cloudbees.com/release/")
+ 
+credentials += Credentials( file("/private/liftmodules/cloudbees.credentials") )
