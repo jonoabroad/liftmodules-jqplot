@@ -14,26 +14,6 @@ package net {
   import liftweb.util.{Helpers,Props}
   import liftweb.util.Props.RunModes._
   
-
-      object JqPlot extends Loggable {
-        
-        def init: Unit = {
-          
-          logger.info("JqPlot.init")
-
-          val coreLibraries = List("jquery.js","jquery.jqplot.js","excanvas.js","jquery.min.js","jquery.jqplot.min.js","excanvas.min.js")
-          
-          ResourceServer.allow({
-            case "js" ::  lib :: Nil if coreLibraries.contains(lib) => true
-            case "js" :: "plugins" ::  plugin :: Nil => true
-            case "css" :: "jquery.jqplot.css" :: Nil => true
-          })
-
-        }
-        
-      }
-      
-  
       class JqPlot(w:Int,h:Int,options:Option[Options],series:List[List[Any]]*) extends Loggable {
         
        val sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm")
