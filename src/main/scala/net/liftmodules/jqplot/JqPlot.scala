@@ -400,24 +400,26 @@ package net {
       }  
       
       //THIS IS WRONG, N,E,S,W are wrong should only be a single letter.
-      sealed trait Location { override def toString = this.getClass.getSimpleName.toLowerCase() }
-      case class NW() extends Location 
-      case class NO() extends Location 
-      case class NE() extends Location 
-      case class EA() extends Location 
-      case class SE() extends Location 
-      case class SO() extends Location 
-      case class SW() extends Location 
-      case class WE() extends Location 
+      sealed trait Location 
+      case class NW() extends Location { override def toString = this.getClass.getSimpleName.toLowerCase() } 
+      case class NO() extends Location { override def toString = "n" }
+      case class NE() extends Location { override def toString = this.getClass.getSimpleName.toLowerCase() }
+      case class EA() extends Location { override def toString = "e" }
+      case class SE() extends Location { override def toString = this.getClass.getSimpleName.toLowerCase() }
+      case class SO() extends Location { override def toString = "s" }
+      case class SW() extends Location { override def toString = this.getClass.getSimpleName.toLowerCase() }
+      case class WE() extends Location { override def toString = "w" }
 
       //Missing show. Assumption, if you don't want to show the legend, don't include it. 
-      case class Legend(location:Option[Location] = None,xoffset:Option[Int] = None,yoffset:Option[Int] = None)  extends JSONable{
+      case class Legend(display:Option[Boolean] = None,location:Option[Location] = None,xoffset:Option[Int] = None,yoffset:Option[Int] = None)  extends JSONable{
 
+        def show:Legend = this.copy(display = Some(true))
+        def hide:Legend = this.copy(display = Some(false))
         def location(l:Location):Legend = this.copy(location = Some(l))
         def xoffset(x:Int):Legend = this.copy(xoffset = Some(x))
         def yoffset(y:Int):Legend = this.copy(yoffset = Some(y))
         
-        private def fields:List[(String,Option[Any])] = List(("location",location),("xoffset",xoffset),("yoffset",yoffset))
+        private def fields:List[(String,Option[Any])] = List(("show",display),("location",location),("xoffset",xoffset),("yoffset",yoffset))
        
         override def toJson = { JField("legend",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
         

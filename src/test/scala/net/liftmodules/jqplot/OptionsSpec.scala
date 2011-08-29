@@ -96,7 +96,22 @@ package net {
         	l.toJson must_==  JField("legend",JObject(List(
         	    JField("location",JString("se")),
         	    JField("xoffset",JInt(10)),
-        	    JField("yoffset",JInt(12)))))  
+        	    JField("yoffset",JInt(12)))))
+        	    
+        	val l1 =  Legend().location(EA()).xoffset(10).yoffset(12)
+        	
+        	l1.toJson must_==  JField("legend",JObject(List(
+        	    JField("location",JString("e")),
+        	    JField("xoffset",JInt(10)),
+        	    JField("yoffset",JInt(12)))))
+        	    
+        	val l2 =  Legend().location(EA()).xoffset(10).yoffset(12).show
+        	
+        	l1.toJson must_==  JField("legend",JObject(List(
+        	    JField("show",JBool(true)),
+        	    JField("location",JString("e")),
+        	    JField("xoffset",JInt(10)),
+        	    JField("yoffset",JInt(12)))))        	    
         }
       }
       
