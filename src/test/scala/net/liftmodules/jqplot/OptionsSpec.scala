@@ -105,13 +105,13 @@ package net {
         	    JField("xoffset",JInt(10)),
         	    JField("yoffset",JInt(12)))))
         	    
-        	val l2 =  Legend().location(EA()).xoffset(10).yoffset(12).show
+        	val l2 =  Legend().location(EA()).xoffset(12).yoffset(14).show
         	
-        	l1.toJson must_==  JField("legend",JObject(List(
+        	l2.toJson must_==  JField("legend",JObject(List(
         	    JField("show",JBool(true)),
         	    JField("location",JString("e")),
-        	    JField("xoffset",JInt(10)),
-        	    JField("yoffset",JInt(12)))))        	    
+        	    JField("xoffset",JInt(12)),
+        	    JField("yoffset",JInt(14)))))        	    
         }
       }
       
