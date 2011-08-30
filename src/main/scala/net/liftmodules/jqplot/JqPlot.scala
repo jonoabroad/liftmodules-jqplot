@@ -279,7 +279,8 @@ package net {
       case class square() extends MarkerStyle
       case class filledCircle() extends MarkerStyle
       case class filledDiamond() extends MarkerStyle
-      case class filledSquare() extends MarkerStyle      
+      case class filledSquare() extends MarkerStyle
+      case class custom(marker:String) extends MarkerStyle { override def toString = marker}
       
       case class MarkerOption(show:Option[Boolean] = None,
            					  style:Option[MarkerStyle] = None,
