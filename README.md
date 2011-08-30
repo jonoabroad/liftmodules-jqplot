@@ -1,4 +1,4 @@
-# JqPlot Lift Module version 0.1.0
+# JqPlot Lift Module version 0.10.0
 
 Add graphs via [JqPlot]( jqplot.com )  into a [Lift](http://www.liftweb.net) application.
 
@@ -11,7 +11,7 @@ Add the following repository to your SBT project file:
 
 And then include this dependency:
 
-  "net.liftmodules.jqplot" %% "jqplot" % (liftVersion+"-0.1.0")
+  "net.liftmodules.jqplot" %% "jqplot" % (liftVersion+"-0.10.0")
 
 In your application's Boot.boot code:
 
