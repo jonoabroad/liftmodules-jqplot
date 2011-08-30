@@ -343,6 +343,7 @@ package net {
     		  		    yaxis:Option[YAxisName] = None,
     		  		    label:Option[String] = None,
     		  			lineWidth:Option[Int] = None,
+    		  			displayLine:Option[Boolean] = None,
     		  			showShadow:Option[Boolean] = None,
                      	shadowAngle:Option[Int] = None,
                      	shadowOffset:Option[Double] = None,
@@ -361,6 +362,8 @@ package net {
         def xaxis(axis:XAxisName):Series =  this.copy(xaxis = Option(axis)) 
         def yaxis(axis:YAxisName):Series =  this.copy(yaxis = Option(axis))
         def lineWidth(w:Int):Series = this.copy(lineWidth = Some(w))
+        def showLine:Series = this.copy(displayLine = Some(true))
+        def hideLine:Series = this.copy(displayLine = Some(false))
         def showShadow(b:Boolean):Series = this.copy(showShadow =  Some(b))
         def shadowAngle(i:Int):Series = this.copy(shadowAngle =  Some(i))
         def shadowOffset(d:Double):Series = this.copy(shadowOffset =  Some(d))
@@ -377,6 +380,7 @@ package net {
         
         def fields:List[(String,Option[Any])] = List(("xaxis",xaxis),("yaxis",yaxis),
         											 ("lineWidth",lineWidth),
+        											 ("showLine",displayLine),
         											 ("showShadow",showShadow),
         											 ("shadowAngle",shadowAngle),
         										     ("shadowOffset",shadowOffset),
@@ -400,7 +404,6 @@ package net {
       
       }  
       
-      //THIS IS WRONG, N,E,S,W are wrong should only be a single letter.
       sealed trait Location 
       case class NW() extends Location { override def toString = this.getClass.getSimpleName.toLowerCase() } 
       case class NO() extends Location { override def toString = "n" }
