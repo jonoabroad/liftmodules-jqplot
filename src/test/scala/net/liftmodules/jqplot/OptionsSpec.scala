@@ -201,6 +201,12 @@ package liftmodules.jqplot {
            series(List(Series().renderer(OHLCRenderer())))
            
            o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())	   	        						     
+           
+           val o7 = Options().title("OHLC").
+           axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()).labelRenderer(CanvasAxisLabelRenderer()))).
+           series(List(Series().renderer(OHLCRenderer())))
+           
+           o7.plugins must_== List(DateAxisRenderer(),CanvasAxisLabelRenderer(),OHLCRenderer())           
         }    
         
       }    

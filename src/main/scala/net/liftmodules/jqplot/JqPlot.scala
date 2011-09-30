@@ -57,7 +57,10 @@ package net {
               	case x:Int    => JInt(x)
               	case x:Double  => JDouble(x)
               	case x:String  => JString(x)              
-              	case x:java.util.Date  => JString(sdf.format(x))             
+              	case x:java.util.Date  => JString(sdf.format(x))      
+              	case x =>
+              	  logger.error("Unknown type %s".format(x))
+              	  JNothing(42)
               }
               )
               })}.toList
@@ -210,14 +213,17 @@ package net {
     	override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) 
     	  
       }
-      
-      case class DateAxisRenderer() extends Renderer   
-      case class LinearAxisRenderer() extends Renderer 
-      case class PieRenderer() extends Renderer
+
+      case class AxisLabelRenderer() extends Renderer
       case class BarRenderer() extends Renderer
-      case class CategoryAxisRenderer() extends Renderer
-      case class OHLCRenderer() extends Renderer
       case class BubbleRenderer() extends Renderer
+      case class CanvasAxisLabelRenderer() extends Renderer
+      case class CategoryAxisRenderer() extends Renderer      
+      case class DateAxisRenderer() extends Renderer
+      case class LinearAxisRenderer() extends Renderer
+      case class MeterGaugeRenderer() extends Renderer
+      case class OHLCRenderer() extends Renderer
+      case class PieRenderer() extends Renderer
       case class RenderOptions() extends Renderer
       case class TickOptions() extends Renderer
       
@@ -232,6 +238,8 @@ package net {
       
       //TODO: Add ticks
       case class Axis(label:Option[String] = None,
+          			  labelRenderer:Option[Renderer] = None,
+          			  labelOptions:Option[LabelOptions] = None,
     		  		  min:Option[String] = None,
     		  		  max:Option[String] = None,
                       pad:Option[String] = None,
@@ -244,6 +252,10 @@ package net {
                       showTickMarks:Option[Boolean] = None) extends JSONable with Renderable {
 
         def label(l:String):Axis = this.copy(label = Some(l))
+        
+        def labelRenderer(l:Renderer):Axis = this.copy(labelRenderer = Some(l))
+        
+        def labelOptions(l:LabelOptions):Axis = this.copy(labelOptions = Some(l))
         
         def min(m:String):Axis = this.copy(min = Some(m))
         
@@ -283,7 +295,7 @@ package net {
         
         def toJson = {JField("axesDefaults",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}        													 
         													 
-        override val possible_renderers = List(renderer)  
+        override val possible_renderers = List(renderer,labelRenderer)  
           
       }
       
@@ -357,6 +369,7 @@ package net {
       case class Series(xaxis:Option[XAxisName] = None,
     		  		    yaxis:Option[YAxisName] = None,
     		  		    label:Option[String] = None,
+    		  		    colour:Option[String] = None,    		  		    
     		  			lineWidth:Option[Int] = None,
     		  			displayLine:Option[Boolean] = None,
     		  			showShadow:Option[Boolean] = None,
@@ -376,6 +389,8 @@ package net {
 
         def xaxis(axis:XAxisName):Series =  this.copy(xaxis = Option(axis)) 
         def yaxis(axis:YAxisName):Series =  this.copy(yaxis = Option(axis))
+        def label(l:String):Series = this.copy(label = Some(l))
+        def colour(c:String):Series = this.copy(colour = Some(c))
         def lineWidth(w:Int):Series = this.copy(lineWidth = Some(w))
         def showLine:Series = this.copy(displayLine = Some(true))
         def hideLine:Series = this.copy(displayLine = Some(false))
@@ -394,7 +409,9 @@ package net {
         def markerOptions(m:MarkerOption):Series = this.copy(markerOptions = Some(m))
         
         def fields:List[(String,Option[Any])] = List(("xaxis",xaxis),("yaxis",yaxis),
-        											 ("lineWidth",lineWidth),
+        	        								 ("label",label),
+        	        								 ("color",colour),        	        								 
+        	        								 ("lineWidth",lineWidth),
         											 ("showLine",displayLine),
         											 ("showShadow",showShadow),
         											 ("shadowAngle",shadowAngle),
@@ -503,6 +520,15 @@ package net {
         override val possible_renderers = List(renderer)
         
       }
- 
+      
+      case class LabelOptions(fontFamily:Option[String] = None,
+                              fontSize:Option[String] = None)  extends JSONable {
+        
+        private val fields:List[(String,Option[Any])] = List(("fontFamily",fontFamily),("fontSize",fontSize))
+
+        override def toJson = { JField("labelOptions",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
+
+      }      
+           
   }
 }
