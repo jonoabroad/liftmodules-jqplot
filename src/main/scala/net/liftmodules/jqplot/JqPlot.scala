@@ -356,8 +356,8 @@ package net {
                      	fillAlpha:Option[Double] = None,                     	
     		  			renderer:Option[Renderer] = None,
     		  			rendererOptions:Option[RenderOptions] = None,
-    		  			markerOptions:Option[MarkerOption] = None    		  			
-    		  			) extends JSONable with Renderable{
+    		  			markerOptions:Option[MarkerOption] = None,
+    		  			color:Option[String] = None) extends JSONable with Renderable{
 
         def xaxis(axis:XAxisName):Series =  this.copy(xaxis = Option(axis)) 
         def yaxis(axis:YAxisName):Series =  this.copy(yaxis = Option(axis))
@@ -377,6 +377,7 @@ package net {
         def renderer(r:Renderer):Series = this.copy(renderer = Some(r))
         def rendererOptions(r:RenderOptions):Series = this.copy(rendererOptions = Some(r))
         def markerOptions(m:MarkerOption):Series = this.copy(markerOptions = Some(m))
+        def color(c:String):Series = this.copy(color = Some(c))
         
         def fields:List[(String,Option[Any])] = List(("xaxis",xaxis),("yaxis",yaxis),
         											 ("lineWidth",lineWidth),
@@ -393,7 +394,8 @@ package net {
         										     ("fillAlpha",fillAlpha),
         										     ("renderer",renderer),
         										     ("rendererOptions",rendererOptions),
-        										     ("markerOptions",markerOptions))
+        										     ("markerOptions",markerOptions),
+        										     ("color",color))
         										        
         										 
         def toJObject = { JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))) }
