@@ -39,7 +39,8 @@ package net {
         def toHtml = {
             val jsonSeries = series.map { s => JArray( s.map { v => JArray( 
               v.map { 
-              	case x:Int    => JInt(x)
+              	case x:Int     => JInt(x)
+              	case x:Long	   => JInt(x)	
               	case x:Double  => JDouble(x)
               	case x:String  => JString(x)              
               	case x:java.util.Date  => JString(sdf.format(x))             
@@ -130,13 +131,14 @@ package net {
         protected def toJValue(x:Any):JValue = x match {
           case s:String       => JString(s)
           case i:Int          => JInt(i)
+          case l:Long         => JInt(l)          
           case d:Double       => JDouble(d)
           case l:Location     => JString(l.toString())
           case b:Boolean      => JBool(b)
           case r:Renderer     => JString(r.toString())
           case m:MarkerOption => m.toJObject
           case m:MarkerStyle  => JString(m.toString())
-          case a:AxisName     => JString(a.toString())          
+          case a:AxisName     => JString(a.toString())
           case t:TickOptions  => t.toJObject
           case j:JSONable 	  => j.toJson
           case otherwise      => logger.error("We didn't cater for %s, sorry.".format(otherwise))
