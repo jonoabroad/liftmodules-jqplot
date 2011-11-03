@@ -98,7 +98,9 @@ package net {
     		  			 seriesDefault:Option[Series] = None,
     		  			 series:Option[MultipleSeries] = None,
                          legend:Option[Legend] = None,
-                         grid:Option[Grid] = None) {
+                         grid:Option[Grid] = None,
+                         highLighter:Option[HighLighter] = None,
+                         cursor:Option[Cursor] = None) {
         
         def title(t:String):Options = this.copy(title = Some(Title(t)))
         
@@ -112,11 +114,15 @@ package net {
         
         def seriesDefault(s:Series):Options = this.copy(seriesDefault = Some(s))
         
-        def series(s:List[Series]):Options = this.copy(series = Some(MultipleSeries(Some(s))))        
+        def series(s:List[Series]):Options = this.copy(series = Some(MultipleSeries(Some(s))))
         
-        private def fields = List(title,axisDefault,axes,legend,grid,seriesDefault,series)
+        def highLighter(h:HighLighter):Options = this.copy(highLighter = Some(h))
         
-        private val renderers:List[Option[Renderable]] = List(axisDefault,axes,seriesDefault,series,grid)  
+        def cursor(c:Cursor):Options = this.copy(cursor = Some(c))
+         
+        private def fields = List(title,axisDefault,axes,legend,grid,seriesDefault,series,highLighter,cursor)
+        
+        private val renderers:List[Option[Renderable]] = List(axisDefault,axes,seriesDefault,series,grid,highLighter,cursor)  
         
         def plugins = (for { b <- renderers; render <- b } yield render.renderers).flatten.distinct
         
@@ -140,6 +146,7 @@ package net {
           case m:MarkerStyle  => JString(m.toString())
           case a:AxisName     => JString(a.toString())
           case t:TickOptions  => t.toJObject
+          case h:HighLighter  => h.toJObject
           case j:JSONable 	  => j.toJson
           case otherwise      => logger.error("We didn't cater for %s, sorry.".format(otherwise))
             JNull
@@ -187,14 +194,17 @@ package net {
       
       sealed trait Renderer { 
     	
-        def name  =  {
+       def name  =  {
           this.getClass.getSimpleName match {
             case n @ "BezierCurveRenderer" => n
-            case n @ "OHLCRenderer" => "ohlcRenderer"
-            case n => n.replaceFirst(n.take(1),n.take(1).toLowerCase)
+            case n @ "OHLCRenderer" 		=> "ohlcRenderer"
+            case n @ "HighLighterRenderer"  => "highlighter"
+            case n @ "CursorRenderer" 		=> "cursor"              
+            case n =>  n.replaceFirst(n.take(1),n.take(1).toLowerCase)
           }
           
         }
+       
     	override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) 
     	  
       }
@@ -206,6 +216,8 @@ package net {
       case class CategoryAxisRenderer() extends Renderer
       case class OHLCRenderer() extends Renderer
       case class BubbleRenderer() extends Renderer
+      case class HighLighterRenderer() extends Renderer
+      case class CursorRenderer() extends Renderer      
       case class RenderOptions() extends Renderer
       
       case class TickOptions(formatString:Option[String] = None) extends JSONable {
@@ -500,6 +512,42 @@ package net {
 
         
         override def toJson = { JField("grid",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
+        
+        override val possible_renderers = List(renderer)
+        
+      }
+      
+      case class HighLighter(show:Option[Boolean] = None) extends JSONable with Renderable {
+        
+    	def display:HighLighter = this.copy(show = Some(true))
+    	
+    	def hide:HighLighter = this.copy(show = Some(false)) 
+	        
+        private val renderer = Some(HighLighterRenderer())
+        
+        private val fields:List[(String,Option[Any])] = List(("show",show))
+        
+        def toJObject = JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))
+        
+        override def toJson = { JField("highlighter",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }
+        
+        override val possible_renderers = List(renderer)
+  
+      }
+      
+      case class Cursor(show:Option[Boolean] = None,tooltipLocation:Option[Location] = None) extends JSONable with Renderable {
+        
+        private val renderer = Some(CursorRenderer())
+        
+        def display:Cursor = this.copy(show = Some(true))
+        def hide:Cursor = this.copy(show = Some(false))
+        def tooltipLocation(l:Location):Cursor = this.copy(tooltipLocation = Some(l))
+
+        private val fields:List[(String,Option[Any])] = List(("show",show),("tooltipLocation",tooltipLocation))
+        
+        def toJObject = JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))
+        
+        override def toJson = { JField("cursor",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
         
         override val possible_renderers = List(renderer)
         

@@ -130,6 +130,43 @@ package net {
         	
         	MarkerOption().style(circle()).toJson must_==  JField("markerOptions",JObject(List(JField("style",JString("circle")))))  
         }
+      }   
+      
+      "HighLighter " should {
+
+
+        " produce correct JSON  " in {
+       
+           val o =  Options().title("example").highLighter(HighLighter().display)
+        	
+           o.toJson must_== JObject(List(JField("title",JString("example")),
+        		   	    JField("highlighter",JObject(
+        		   	        List(JField("show",JBool(true)))))))
+        		   	        						
+             
+        }
+      }
+      
+      "Cursor " should {
+
+
+        " produce correct JSON  " in {
+       
+           val o =  Options().title("example").cursor(Cursor().display.tooltipLocation(SW()))
+        	
+           o.toJson must_== JObject(List(JField("title",JString("example")),
+        		   			JField("cursor",JObject(List(
+        		   					JField("show",JBool(true)),
+        		   					JField("tooltipLocation",JString("sw")))))))
+        		   	        						
+             
+        }
+        
+        "produce the correct plugin name " in {
+          
+          Cursor().renderers.head.name must_== "cursor"
+          
+        }
       }      
       
       "Options " should {
@@ -160,6 +197,8 @@ package net {
              
         }
         
+                
+        
         " produce correct plugin lists" in {
           
           Axes().xaxis(Axis().renderer(DateAxisRenderer())).renderers must_== List(DateAxisRenderer())
@@ -189,7 +228,20 @@ package net {
            axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
            series(List(Series().renderer(OHLCRenderer())))
            
-           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())	   	        						     
+           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())
+           
+           val o7 = Options().title("OHLC").
+           axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
+           series(List(Series().renderer(OHLCRenderer()))).highLighter(HighLighter().display)
+           
+           o7.plugins must_== List(DateAxisRenderer(),OHLCRenderer(),HighLighterRenderer())	   	        						     
+
+           val o8 = Options().title("OHLC").cursor(Cursor().display)
+
+           o8.plugins must_== List(CursorRenderer())	
+           
+           
+           
         }    
         
       }    
