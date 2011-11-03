@@ -127,7 +127,7 @@ package net {
         
         def toJson:JField  
         
-        protected def toJValue(x:Any) = x match {
+        protected def toJValue(x:Any):JValue = x match {
           case s:String       => JString(s)
           case i:Int          => JInt(i)
           case d:Double       => JDouble(d)
@@ -137,6 +137,7 @@ package net {
           case m:MarkerOption => m.toJObject
           case m:MarkerStyle  => JString(m.toString())
           case a:AxisName     => JString(a.toString())          
+          case t:TickOptions  => t.toJObject
           case j:JSONable 	  => j.toJson
           case otherwise      => logger.error("We didn't cater for %s, sorry.".format(otherwise))
             JNull
@@ -204,7 +205,18 @@ package net {
       case class OHLCRenderer() extends Renderer
       case class BubbleRenderer() extends Renderer
       case class RenderOptions() extends Renderer
-      case class TickOptions() extends Renderer
+      
+      case class TickOptions(formatString:Option[String] = None) extends JSONable {
+        
+        def formatString(s:String):TickOptions = this.copy(formatString = Some(s))
+        
+        private def fields:List[(String,Option[Any])] = List(("formatString", formatString))
+        													 
+        def toJObject = JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))
+        
+        def toJson = JField("tickOptions",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))
+        
+      }
       
       sealed trait AxisName  { override def toString = this.getClass.getSimpleName }
       sealed trait XAxisName extends AxisName

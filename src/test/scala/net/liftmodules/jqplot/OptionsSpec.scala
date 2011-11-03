@@ -76,7 +76,11 @@ package net {
           val a2 = Axes().xaxis(Axis().min("42").max("forty two")).yaxis(Axis().min("24").max("two forty"))
         	
           a2.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two"))))),JField("yaxis",JObject(List(JField("min",JString("24")),JField("max",JString("two forty"))))))))  
+        
+          val a3 = Axes().xaxis(Axis().tickOptions(TickOptions().formatString("%d")))
         	
+          a3.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("tickOptions",JObject(List(JField("formatString",JString("%d")))))))))))          
+          
         }
       }         
       
