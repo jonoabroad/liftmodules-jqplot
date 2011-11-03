@@ -1,5 +1,20 @@
+/*
+        Copyright 2011 Spiral Arm Ltd
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.package bootstrap.liftmodules
+*/
 package net {
-  package liftmodules.jqplot {
+package liftmodules.jqplot {
 
   import org.specs2.mutable._
   import liftweb.json.JsonAST.{JArray,JBool,JField,JInt,JObject,JString}
@@ -76,7 +91,11 @@ package net {
           val a2 = Axes().xaxis(Axis().min("42").max("forty two")).yaxis(Axis().min("24").max("two forty"))
         	
           a2.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two"))))),JField("yaxis",JObject(List(JField("min",JString("24")),JField("max",JString("two forty"))))))))  
+        
+          val a3 = Axes().xaxis(Axis().tickOptions(TickOptions().formatString("%d")))
         	
+          a3.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("tickOptions",JObject(List(JField("formatString",JString("%d")))))))))))          
+          
         }
       }         
       
@@ -126,6 +145,43 @@ package net {
         	
         	MarkerOption().style(circle()).toJson must_==  JField("markerOptions",JObject(List(JField("style",JString("circle")))))  
         }
+      }   
+      
+      "HighLighter " should {
+
+
+        " produce correct JSON  " in {
+       
+           val o =  Options().title("example").highLighter(HighLighter().display)
+        	
+           o.toJson must_== JObject(List(JField("title",JString("example")),
+        		   	    JField("highlighter",JObject(
+        		   	        List(JField("show",JBool(true)))))))
+        		   	        						
+             
+        }
+      }
+      
+      "Cursor " should {
+
+
+        " produce correct JSON  " in {
+       
+           val o =  Options().title("example").cursor(Cursor().display.tooltipLocation(SW()))
+        	
+           o.toJson must_== JObject(List(JField("title",JString("example")),
+        		   			JField("cursor",JObject(List(
+        		   					JField("show",JBool(true)),
+        		   					JField("tooltipLocation",JString("sw")))))))
+        		   	        						
+             
+        }
+        
+        "produce the correct plugin name " in {
+          
+          Cursor().renderers.head.name must_== "cursor"
+          
+        }
       }      
       
       "Options " should {
@@ -156,6 +212,8 @@ package net {
              
         }
         
+                
+        
         " produce correct plugin lists" in {
           
           Axes().xaxis(Axis().renderer(DateAxisRenderer())).renderers must_== List(DateAxisRenderer())
@@ -185,7 +243,23 @@ package net {
            axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
            series(List(Series().renderer(OHLCRenderer())))
            
-           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())	   	        						     
+           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())
+
+           val o7 = Options().title("OHLC").
+           axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()).labelRenderer(CanvasAxisLabelRenderer()))).
+           series(List(Series().renderer(OHLCRenderer())))
+           
+           o7.plugins must_== List(DateAxisRenderer(),CanvasAxisLabelRenderer(),OHLCRenderer())           
+
+           val o8 = Options().title("OHLC").cursor(Cursor().display)
+
+           o8.plugins must_== List(CursorRenderer())	
+           
+           
+           
+           
+           
+
         }    
         
       }    
