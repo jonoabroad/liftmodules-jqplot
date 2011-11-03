@@ -1,3 +1,18 @@
+/*
+        Copyright 2011 Spiral Arm Ltd
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.package bootstrap.liftmodules
+*/
 package net {
   package liftmodules.jqplot {
   
@@ -43,7 +58,10 @@ package net {
               	case x:Long	   => JInt(x)	
               	case x:Double  => JDouble(x)
               	case x:String  => JString(x)              
-              	case x:java.util.Date  => JString(sdf.format(x))             
+              	case x:java.util.Date  => JString(sdf.format(x))      
+              	case x =>
+              	  logger.error("Unknown type %s".format(x))
+              	  JNothing(42)
               }
               )
               })}.toList
@@ -208,16 +226,19 @@ package net {
     	override def toString = "$.jqplot.%s".format(this.getClass.getSimpleName) 
     	  
       }
-      
-      case class DateAxisRenderer() extends Renderer   
-      case class LinearAxisRenderer() extends Renderer 
-      case class PieRenderer() extends Renderer
+
+      case class AxisLabelRenderer() extends Renderer
       case class BarRenderer() extends Renderer
-      case class CategoryAxisRenderer() extends Renderer
-      case class OHLCRenderer() extends Renderer
       case class BubbleRenderer() extends Renderer
       case class HighLighterRenderer() extends Renderer
       case class CursorRenderer() extends Renderer      
+      case class CanvasAxisLabelRenderer() extends Renderer
+      case class CategoryAxisRenderer() extends Renderer      
+      case class DateAxisRenderer() extends Renderer
+      case class LinearAxisRenderer() extends Renderer
+      case class MeterGaugeRenderer() extends Renderer
+      case class OHLCRenderer() extends Renderer
+      case class PieRenderer() extends Renderer
       case class RenderOptions() extends Renderer
       
       case class TickOptions(formatString:Option[String] = None) extends JSONable {
@@ -243,6 +264,8 @@ package net {
       
       //TODO: Add ticks
       case class Axis(label:Option[String] = None,
+          			  labelRenderer:Option[Renderer] = None,
+          			  labelOptions:Option[LabelOptions] = None,
     		  		  min:Option[String] = None,
     		  		  max:Option[String] = None,
                       pad:Option[String] = None,
@@ -255,6 +278,10 @@ package net {
                       showTickMarks:Option[Boolean] = None) extends JSONable with Renderable {
 
         def label(l:String):Axis = this.copy(label = Some(l))
+        
+        def labelRenderer(l:Renderer):Axis = this.copy(labelRenderer = Some(l))
+        
+        def labelOptions(l:LabelOptions):Axis = this.copy(labelOptions = Some(l))
         
         def min(m:String):Axis = this.copy(min = Some(m))
         
@@ -294,7 +321,7 @@ package net {
         
         def toJson = {JField("axesDefaults",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t))))}        													 
         													 
-        override val possible_renderers = List(renderer)  
+        override val possible_renderers = List(renderer,labelRenderer)  
           
       }
       
@@ -368,6 +395,7 @@ package net {
       case class Series(xaxis:Option[XAxisName] = None,
     		  		    yaxis:Option[YAxisName] = None,
     		  		    label:Option[String] = None,
+    		  		    colour:Option[String] = None,    		  		    
     		  			lineWidth:Option[Int] = None,
     		  			displayLine:Option[Boolean] = None,
     		  			showShadow:Option[Boolean] = None,
@@ -387,6 +415,8 @@ package net {
 
         def xaxis(axis:XAxisName):Series =  this.copy(xaxis = Option(axis)) 
         def yaxis(axis:YAxisName):Series =  this.copy(yaxis = Option(axis))
+        def label(l:String):Series = this.copy(label = Some(l))
+        def colour(c:String):Series = this.copy(colour = Some(c))
         def lineWidth(w:Int):Series = this.copy(lineWidth = Some(w))
         def showLine:Series = this.copy(displayLine = Some(true))
         def hideLine:Series = this.copy(displayLine = Some(false))
@@ -406,7 +436,9 @@ package net {
         def color(c:String):Series = this.copy(color = Some(c))
         
         def fields:List[(String,Option[Any])] = List(("xaxis",xaxis),("yaxis",yaxis),
-        											 ("lineWidth",lineWidth),
+        	        								 ("label",label),
+        	        								 ("color",colour),        	        								 
+        	        								 ("lineWidth",lineWidth),
         											 ("showLine",displayLine),
         											 ("showShadow",showShadow),
         											 ("shadowAngle",shadowAngle),
@@ -553,5 +585,14 @@ package net {
         
       }
  
+      case class LabelOptions(fontFamily:Option[String] = None,
+                              fontSize:Option[String] = None)  extends JSONable {
+        
+        private val fields:List[(String,Option[Any])] = List(("fontFamily",fontFamily),("fontSize",fontSize))
+
+        override def toJson = { JField("labelOptions",JObject(for { b <- fields; t <- b._2 } yield JField(b._1,toJValue(t)))) }        
+
+      }      
+           
   }
 }

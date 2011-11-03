@@ -1,5 +1,20 @@
+/*
+        Copyright 2011 Spiral Arm Ltd
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.package bootstrap.liftmodules
+*/
 package net {
-  package liftmodules.jqplot {
+package liftmodules.jqplot {
 
   import org.specs2.mutable._
   import liftweb.json.JsonAST.{JArray,JBool,JField,JInt,JObject,JString}
@@ -229,12 +244,12 @@ package net {
            series(List(Series().renderer(OHLCRenderer())))
            
            o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())
-           
+
            val o7 = Options().title("OHLC").
-           axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
-           series(List(Series().renderer(OHLCRenderer()))).highLighter(HighLighter().display)
+           axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()).labelRenderer(CanvasAxisLabelRenderer()))).
+           series(List(Series().renderer(OHLCRenderer())))
            
-           o7.plugins must_== List(DateAxisRenderer(),OHLCRenderer(),HighLighterRenderer())	   	        						     
+           o7.plugins must_== List(DateAxisRenderer(),CanvasAxisLabelRenderer(),OHLCRenderer())           
 
            val o8 = Options().title("OHLC").cursor(Cursor().display)
 
@@ -242,6 +257,9 @@ package net {
            
            
            
+           
+           
+
         }    
         
       }    
