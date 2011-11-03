@@ -91,7 +91,11 @@ package liftmodules.jqplot {
           val a2 = Axes().xaxis(Axis().min("42").max("forty two")).yaxis(Axis().min("24").max("two forty"))
         	
           a2.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("min",JString("42")),JField("max",JString("forty two"))))),JField("yaxis",JObject(List(JField("min",JString("24")),JField("max",JString("two forty"))))))))  
+        
+          val a3 = Axes().xaxis(Axis().tickOptions(TickOptions().formatString("%d")))
         	
+          a3.toJson must_==  JField("axes",JObject(List(JField("xaxis",JObject(List(JField("tickOptions",JObject(List(JField("formatString",JString("%d")))))))))))          
+          
         }
       }         
       
@@ -141,6 +145,43 @@ package liftmodules.jqplot {
         	
         	MarkerOption().style(circle()).toJson must_==  JField("markerOptions",JObject(List(JField("style",JString("circle")))))  
         }
+      }   
+      
+      "HighLighter " should {
+
+
+        " produce correct JSON  " in {
+       
+           val o =  Options().title("example").highLighter(HighLighter().display)
+        	
+           o.toJson must_== JObject(List(JField("title",JString("example")),
+        		   	    JField("highlighter",JObject(
+        		   	        List(JField("show",JBool(true)))))))
+        		   	        						
+             
+        }
+      }
+      
+      "Cursor " should {
+
+
+        " produce correct JSON  " in {
+       
+           val o =  Options().title("example").cursor(Cursor().display.tooltipLocation(SW()))
+        	
+           o.toJson must_== JObject(List(JField("title",JString("example")),
+        		   			JField("cursor",JObject(List(
+        		   					JField("show",JBool(true)),
+        		   					JField("tooltipLocation",JString("sw")))))))
+        		   	        						
+             
+        }
+        
+        "produce the correct plugin name " in {
+          
+          Cursor().renderers.head.name must_== "cursor"
+          
+        }
       }      
       
       "Options " should {
@@ -171,6 +212,8 @@ package liftmodules.jqplot {
              
         }
         
+                
+        
         " produce correct plugin lists" in {
           
           Axes().xaxis(Axis().renderer(DateAxisRenderer())).renderers must_== List(DateAxisRenderer())
@@ -200,13 +243,23 @@ package liftmodules.jqplot {
            axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()))).
            series(List(Series().renderer(OHLCRenderer())))
            
-           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())	   	        						     
-           
+           o6.plugins must_== List(DateAxisRenderer(),OHLCRenderer())
+
            val o7 = Options().title("OHLC").
            axes(Axes().xaxis(Axis().renderer(DateAxisRenderer()).labelRenderer(CanvasAxisLabelRenderer()))).
            series(List(Series().renderer(OHLCRenderer())))
            
            o7.plugins must_== List(DateAxisRenderer(),CanvasAxisLabelRenderer(),OHLCRenderer())           
+
+           val o8 = Options().title("OHLC").cursor(Cursor().display)
+
+           o8.plugins must_== List(CursorRenderer())	
+           
+           
+           
+           
+           
+
         }    
         
       }    
