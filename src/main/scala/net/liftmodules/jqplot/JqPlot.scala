@@ -275,7 +275,8 @@ package net {
                       rendererOptions:Option[RenderOptions] = None,
                       tickOptions:Option[TickOptions] = None,
                       showTicks:Option[Boolean] = None,
-                      showTickMarks:Option[Boolean] = None) extends JSONable with Renderable {
+                      showTickMarks:Option[Boolean] = None,
+                      syncTicks_? : Option[Boolean] = None) extends JSONable with Renderable {
 
         def label(l:String):Axis = this.copy(label = Some(l))
         
@@ -303,6 +304,8 @@ package net {
         
         def showTickMarks(b:Boolean):Axis = this.copy(showTickMarks = Some(b))
         
+        def syncTicks:Axis = this.copy(syncTicks_? = Some(true))        
+        
         private def fields:List[(String,Option[Any])] = List(("label",label),
         													 ("min",min),
         													 ("max",max),
@@ -313,7 +316,8 @@ package net {
         													 ("rendererOptions",rendererOptions),
         													 ("tickOptions",tickOptions),
         													 ("showTicks",showTicks),
-        													 ("showTickMarks",showTickMarks))
+        													 ("showTickMarks",showTickMarks),
+        													 ("syncTicks",syncTicks_?))
         													 
         													 
         

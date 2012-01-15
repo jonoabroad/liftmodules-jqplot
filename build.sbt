@@ -4,7 +4,7 @@ scalaVersion := "2.9.1"
 
 crossScalaVersions := Seq("2.9.0-1", "2.9.1")
 
-version := "2.4-M5-0.12.0"
+version := "2.4-M5-0.13.0"
 
 organization := "net.liftmodules"
 
