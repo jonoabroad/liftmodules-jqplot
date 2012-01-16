@@ -11,7 +11,7 @@ organization := "net.liftmodules"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
  
 // If using JRebel
-jettyScanDirs := Nil
+//jettyScanDirs := Nil
 
 resolvers += "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
 

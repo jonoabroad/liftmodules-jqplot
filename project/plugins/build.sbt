@@ -1,6 +1,6 @@
 resolvers += "Web plugin repo" at "http://siasia.github.com/maven2"
 
-libraryDependencies <+= sbtVersion(v => "com.github.siasia" %% "xsbt-web-plugin" % ("0.1.1-"+v))
+libraryDependencies <+= sbtVersion(v => "com.github.siasia" %% "xsbt-web-plugin" % (v+"-0.2.10"))
 
 resolvers += {
   val typesafeRepoUrl = new java.net.URL("http://repo.typesafe.com/typesafe/releases")
@@ -9,12 +9,13 @@ resolvers += {
 }
 
 libraryDependencies <<= (libraryDependencies, sbtVersion) { (deps, version) => 
-  deps :+ ("com.typesafe.sbteclipse" %% "sbteclipse" % "1.3-RC2" extra("sbtversion" -> version))
+  deps :+ ("com.typesafe.sbteclipse" %% "sbteclipse" % "2.0.0-M3" )
 }
 
 resolvers += "sonatype.repo" at "https://oss.sonatype.org/content/groups/public"
 
-libraryDependencies <+= sbtVersion(v => "eu.getintheloop" %% "sbt-cloudbees-plugin" % ("0.3.1_"+v))
+addSbtPlugin("eu.getintheloop" %% "sbt-cloudbees-plugin" % "0.4.0") 
+
 
 
 

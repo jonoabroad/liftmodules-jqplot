@@ -13,3 +13,4 @@
 /lift_proto.db.lock.db
 /project/target/
 /.target/
+.cache
