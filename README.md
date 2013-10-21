@@ -1,6 +1,6 @@
 # JqPlot Lift Module version 0.13.0
 
-Built using sbt 0.11.2
+Built using sbt 0.13.0
 
 Add graphs via [JqPlot]( jqplot.com )  into a [Lift](http://www.liftweb.net) application.
 
@@ -21,7 +21,7 @@ In your application's Boot.boot code:
 
 ## Supported Scala and Lift versions
 
-Scala  2.9.0-1: from Lift 2.4-M3 and onwards
+Scala  2.10.3: from Lift 2.5 and onwards
 
 ## Tested on 
 
@@ -41,6 +41,7 @@ Safari  5.1
 
 ## TODO
 
+  * Test 2.5 
   * Tidy up & finish options. 
   * Only add header information once if multiple graphs are on the same page.
   * Add ajax data & options 

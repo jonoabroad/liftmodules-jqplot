@@ -1,11 +1,8 @@
-//uses sbt 0.11.2
 name := "JqPlot"
  
-scalaVersion := "2.9.1" 
+scalaVersion := "2.10.3" 
 
-crossScalaVersions := Seq("2.9.0-1", "2.9.1")
-
-version := "2.4-0.13.0"
+version := "2.5-0.13.0"
 
 organization := "net.liftmodules"
 
@@ -17,13 +14,13 @@ scalacOptions ++= Seq("-unchecked", "-deprecation")
 resolvers += "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
 
 libraryDependencies ++= {
-  val liftVersion = "2.4" 
+  val liftVersion = "2.5" 
   Seq("net.liftweb" %% "lift-webkit" % liftVersion % "compile->default")
 }
 
 // Customize any further dependencies as desired
 libraryDependencies ++= Seq(
-    "org.specs2" %% "specs2" % "1.5"  % "test",
+    "org.specs2" %% "specs2" % "2.2.3"  % "test",
     "javax.servlet" % "servlet-api" % "2.5" % "provided->default",
     "ch.qos.logback" % "logback-classic" % "0.9.29" % "compile->default" 
   )
