@@ -2,7 +2,7 @@ name := "JqPlot"
  
 scalaVersion := "2.10.3" 
 
-version := "2.5-0.13.0"
+version := "2.5-0.14.0"
 
 organization := "net.liftmodules"
 
