@@ -1,4 +1,4 @@
-# JqPlot Lift Module version 0.13.0
+# JqPlot Lift Module version 0.14.0
 
 Built using sbt 0.13.0
 
